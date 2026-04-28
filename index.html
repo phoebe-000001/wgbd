@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>贏界 Wingea · 遊戲抽點表</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async></script>
+<style>
+/* ── Login screen ── */
+.login-screen{position:fixed;inset:0;background:#f7f6f3;z-index:9999;display:flex;align-items:center;justify-content:center;}
+.login-card{background:#fff;border:1px solid #e2e0d8;border-radius:16px;padding:40px 48px;text-align:center;max-width:380px;width:100%;}
+.login-logo{width:48px;height:48px;background:#2a5cff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.login-logo-dot{width:22px;height:22px;background:#fff;border-radius:50%;}
+.login-title{font-size:18px;font-weight:600;color:#1a1917;margin-bottom:6px;}
+.login-sub{font-size:13px;color:#6b6860;margin-bottom:28px;}
+.login-err{font-size:12px;color:#b91c1c;margin-top:14px;padding:8px 12px;background:#fee2e2;border-radius:8px;display:none;}
+</style>
 <style>
 :root{
   --bg:#f7f6f3;--sur:#fff;--sur2:#f0efe9;--bdr:#e2e0d8;--bdr2:#ccc9bc;
@@ -187,9 +198,21 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 </head>
 <body>
 
+<!-- ── Login screen ── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo"><div class="login-logo-dot"></div></div>
+    <div class="login-title">贏界 Wingea</div>
+    <div class="login-sub">請用 wingea.vip 帳號登入</div>
+    <div id="g_id_signin"></div>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>贏界 Wingea · 遊戲抽點表</div>
   <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
+  <div id="userInfo" style="display:flex;align-items:center;margin-left:16px;"></div>
 </header>
 
 <div class="page">
@@ -774,7 +797,59 @@ function switchView(v){
   render();
 }
 
-loadAll();
+
+// ── Auth ──────────────────────────────────────────────
+const CLIENT_ID = '1031858151521-k4a6p25nd81oiuio7id9d9p5odacgqdr.apps.googleusercontent.com';
+const ALLOWED_DOMAIN = 'wingea.vip';
+let currentUser = null;
+
+function initAuth(){
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredential,
+    auto_select: true,
+  });
+  google.accounts.id.renderButton(
+    document.getElementById('g_id_signin'),
+    {theme:'outline', size:'large', text:'signin_with', locale:'zh-TW', width:280}
+  );
+  google.accounts.id.prompt();
+}
+
+function handleCredential(response){
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  const email   = payload.email || '';
+  const domain  = email.split('@')[1] || '';
+  if(domain !== ALLOWED_DOMAIN){
+    const err = document.getElementById('loginErr');
+    err.textContent = `帳號 ${email} 沒有存取權限，請用 @wingea.vip 帳號登入。`;
+    err.style.display = 'block';
+    return;
+  }
+  currentUser = { email, name: payload.name, picture: payload.picture };
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('userInfo').innerHTML =
+    `<img src="${payload.picture}" style="width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle">` +
+    `<span style="font-size:12px;color:var(--t2)">${payload.name}</span>` +
+    `<button onclick="signOut()" style="margin-left:10px;height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer">登出</button>`;
+  loadAll();
+}
+
+function signOut(){
+  google.accounts.id.disableAutoSelect();
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('userInfo').innerHTML = '';
+  document.getElementById('mainContent').innerHTML = '<div class="state"><div class="spin"></div>請先登入</div>';
+}
+
+window.addEventListener('load', ()=>{
+  if(typeof google !== 'undefined' && google.accounts) initAuth();
+  else {
+    const s = document.querySelector('script[src*="gsi/client"]');
+    if(s) s.addEventListener('load', initAuth);
+  }
+});
 </script>
 </body>
 </html>
