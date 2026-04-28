@@ -843,13 +843,15 @@ function signOut(){
   document.getElementById('mainContent').innerHTML = '<div class="state"><div class="spin"></div>請先登入</div>';
 }
 
-window.addEventListener('load', ()=>{
-  if(typeof google !== 'undefined' && google.accounts) initAuth();
-  else {
-    const s = document.querySelector('script[src*="gsi/client"]');
-    if(s) s.addEventListener('load', initAuth);
+// 等 GSI script 載入完成後初始化，用 polling 確保不漏掉
+function waitForGoogle(){
+  if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
+    initAuth();
+  } else {
+    setTimeout(waitForGoogle, 100);
   }
-});
+}
+waitForGoogle();
 </script>
 </body>
 </html>
