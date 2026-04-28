@@ -327,7 +327,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
         <label class="ck"><input type="checkbox" id="ck_src"      checked onchange="render()"> 遊戲來源</label>
         <label class="ck"><input type="checkbox" id="ck_prov"     checked onchange="render()"> provider_code</label>
         <label class="ck"><input type="checkbox" id="ck_ctrl"     checked onchange="render()"> 可控</label>
-        <label class="ck"><input type="checkbox" id="ck_enabled"  checked onchange="render()"> 全域啟用</label>
+        <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 全域啟用</label>
         <label class="ck"><input type="checkbox" id="ck_cat_icon"  onchange="render()"> category_icon</label>
         <label class="ck"><input type="checkbox" id="ck_bal_icon"  onchange="render()"> balance_icon</label>
         <label class="ck"><input type="checkbox" id="ck_ext"       onchange="render()"> ext_category_code</label>
@@ -435,7 +435,12 @@ let view='table', sortK=null, sortD=1, editingId=null;
 
 // ── API ───────────────────────────────────────────────
 async function apiGet(a){const r=await fetch(`${API_URL}?action=${a}`);return r.json();}
-async function apiPost(b){const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});return r.json();}
+async function apiPost(b){
+  // Apps Script 不支援跨域 POST，改用 GET + payload 參數
+  const encoded = encodeURIComponent(JSON.stringify(b));
+  const r = await fetch(`${API_URL}?payload=${encoded}`);
+  return r.json();
+}
 
 async function loadAll(){
   try{
