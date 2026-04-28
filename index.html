@@ -817,7 +817,10 @@ function initAuth(){
 }
 
 function handleCredential(response){
-  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  // Google JWT 用 base64url，需先轉成標準 base64
+  const base64url = response.credential.split('.')[1];
+  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
+  const payload = JSON.parse(atob(base64));
   const email   = payload.email || '';
   const domain  = email.split('@')[1] || '';
   if(domain !== ALLOWED_DOMAIN){
