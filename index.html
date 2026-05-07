@@ -634,7 +634,7 @@ function render(){
   else renderSiteOverview(data);
 }
 
-function baseColumns(d){
+function baseColumns(d,skipEnabled){
   let r=`<td class="sticky-col td-name" style="min-width:160px;max-width:180px">
     <div class="td-en">${esc(d.en)}</div><div class="td-cn">${esc(d.cn)}</div>
     ${d.note?`<div class="td-note">${esc(d.note)}</div>`:''}
@@ -646,11 +646,11 @@ function baseColumns(d){
   if(ck('ck_prov'))r+=`<td class="mono">${d.prov_code?`<span title="${esc(d.prov_code)}">${esc(d.prov_code)}</span>`:'—'}</td>`;
   if(ck('ck_ext')) r+=`<td class="mono">${d.ext_cat||'—'}</td>`;
   if(ck('ck_ctrl'))r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
-  if(ck('ck_enabled'))r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
+  if(ck('ck_enabled')&&!skipEnabled)r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
   return r;
 }
 
-function baseHead(){
+function baseHead(skipEnabled){
   let h='<th class="sticky-col">供應商</th><th>類別</th>';
   if(ck('ck_src'))  h+='<th>遊戲來源</th>';
   if(ck('ck_cat_icon'))h+='<th>category_icon</th>';
@@ -658,7 +658,7 @@ function baseHead(){
   if(ck('ck_prov'))h+='<th>provider_code</th>';
   if(ck('ck_ext')) h+='<th>ext_category_code</th>';
   if(ck('ck_ctrl'))h+='<th style="text-align:center">可控</th>';
-  if(ck('ck_enabled'))h+='<th style="text-align:center">預設啟用</th>';
+  if(ck('ck_enabled')&&!skipEnabled)h+='<th style="text-align:center">預設啟用</th>';
   return h;
 }
 
@@ -747,21 +747,24 @@ function renderCurrencyTable(data){
 // ── Site rate table ───────────────────────────────────
 function renderSiteRateTable(data){
   const activeSites=ddSel.site.size?[...ddSel.site]:SITE_ORDER;
-  let head='<tr>'+baseHead();
+  let head='<tr>'+baseHead(true); // skip enabled col - shown inline on rate cells
   activeSites.forEach(function(s){
     head+=`<th style="text-align:right">${SITE_LABEL[s].split(' ')[0]}</th>`;
   });
   head+='<th style="text-align:center">操作</th></tr>';
 
   let rows=data.map(function(d){
-    let r='<tr>'+baseColumns(d);
+    let r='<tr>'+baseColumns(d,true); // skip enabled col
     activeSites.forEach(function(s){
       const sv=(d.sites&&d.sites[s])||{};
       if(!sv||sv.r===null){
         r+=`<td class="null-cell" onclick="editSiteRate(${d.id},'${s}',null,null)">＋</td>`;
       } else {
         const profitStr=sv.p!==null&&sv.p!==undefined?`<div class="profit">+${pct(sv.p)}</div>`:'';
-        const enabledMark=sv.enabled==='Y'?'<span style="font-size:9px;color:var(--green)"> ✓</span>':sv.enabled==='N'?'<span style="font-size:9px;color:var(--t3)"> ✗</span>':'';
+        // 預設啟用 ✓/✗ 只在勾選「預設啟用」時才顯示在費率旁邊
+        const enabledMark=ck('ck_enabled')
+          ?(sv.enabled==='Y'?'<span style="font-size:9px;color:var(--green)"> ✓</span>':sv.enabled==='N'?'<span style="font-size:9px;color:var(--t3)"> ✗</span>':'')
+          :'';
         r+=`<td class="rc-click" onclick="editSiteRate(${d.id},'${s}',${sv.r},${JSON.stringify(sv.enabled||'')})">
           <span style="font-size:12px">${pct(sv.r)}${enabledMark}</span>${profitStr}
         </td>`;
