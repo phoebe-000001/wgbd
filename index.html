@@ -7,16 +7,6 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
-/* ── Login screen ── */
-.login-screen{position:fixed;inset:0;background:#f7f6f3;z-index:9999;display:flex;align-items:center;justify-content:center;}
-.login-card{background:#fff;border:1px solid #e2e0d8;border-radius:16px;padding:40px 48px;text-align:center;max-width:380px;width:100%;}
-.login-logo{width:48px;height:48px;background:#2a5cff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
-.login-logo-dot{width:22px;height:22px;background:#fff;border-radius:50%;}
-.login-title{font-size:18px;font-weight:600;color:#1a1917;margin-bottom:6px;}
-.login-sub{font-size:13px;color:#6b6860;margin-bottom:28px;}
-.login-err{font-size:12px;color:#b91c1c;margin-top:14px;padding:8px 12px;background:#fee2e2;border-radius:8px;display:none;}
-</style>
-<style>
 :root{
   --bg:#f7f6f3;--sur:#fff;--sur2:#f0efe9;--bdr:#e2e0d8;--bdr2:#ccc9bc;
   --t:#1a1917;--t2:#6b6860;--t3:#9e9b93;
@@ -27,98 +17,123 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--sans);background:var(--bg);color:var(--t);min-height:100vh;}
 
+/* Login */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
+.login-card{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:40px 48px;text-align:center;max-width:380px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+.login-logo{width:48px;height:48px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.login-logo-dot{width:22px;height:22px;background:#fff;border-radius:50%;}
+.login-title{font-size:18px;font-weight:600;margin-bottom:6px;}
+.login-sub{font-size:13px;color:var(--t2);margin-bottom:28px;}
+.login-err{font-size:12px;color:var(--red);margin-top:14px;padding:8px 12px;background:var(--redbg);border-radius:8px;display:none;}
+
+/* Header */
 .hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:300;}
 .logo{font-size:14px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
 .logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;}
+.hdr-right{display:flex;align-items:center;gap:12px;}
 .sync{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:6px;}
 .sync-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);}
+.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+.btn-signout{height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
 
-.page{max-width:1600px;margin:0 auto;padding:20px 28px;}
+/* Layout */
+.page{max-width:1700px;margin:0 auto;padding:16px 24px;}
 
-/* ── Filter bar ── */
-.filter-bar{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:14px;overflow:visible;}
-.frow{display:flex;align-items:center;min-height:44px;border-bottom:1px solid var(--bdr);}
+/* Filter bar */
+.filter-bar{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:12px;overflow:visible;}
+.frow{display:flex;align-items:center;min-height:42px;border-bottom:1px solid var(--bdr);}
 .frow:last-child{border-bottom:none;}
-.flbl{width:88px;flex-shrink:0;padding:0 14px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--bdr);align-self:stretch;display:flex;align-items:center;}
-.fcontent{flex:1;padding:6px 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.flbl{width:84px;flex-shrink:0;padding:0 14px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--bdr);align-self:stretch;display:flex;align-items:center;}
+.fcontent{flex:1;padding:5px 12px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
 
-/* search */
-.srch{position:relative;flex:1;min-width:200px;max-width:420px;}
+/* Search */
+.srch{position:relative;flex:1;min-width:200px;max-width:400px;}
 .sicon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none;}
-input[type=text]{width:100%;height:32px;padding:0 10px 0 30px;font-size:13px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;}
+input[type=text]{width:100%;height:30px;padding:0 10px 0 30px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;}
 input[type=text]:focus{border-color:var(--accent);background:#fff;}
 
-/* ── Searchable dropdown ── */
+/* Dropdown */
 .dd{position:relative;flex-shrink:0;}
-.dd-btn{height:32px;padding:0 28px 0 11px;border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);font-size:12px;font-family:var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap;position:relative;user-select:none;transition:border-color .15s;}
-.dd-btn::after{content:"▾";position:absolute;right:9px;font-size:9px;color:var(--t3);}
-.dd-btn.open,.dd-btn:hover{border-color:var(--bdr2);}
+.dd-btn{height:30px;padding:0 26px 0 10px;border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);font-size:12px;font-family:var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;position:relative;user-select:none;}
+.dd-btn::after{content:"▾";position:absolute;right:8px;font-size:9px;color:var(--t3);}
 .dd-btn.open{border-color:var(--accent);background:var(--sur);}
 .dd-btn.has{border-color:var(--accent);}
-.dd-badge{background:var(--accent);color:#fff;border-radius:10px;font-size:10px;font-weight:500;padding:1px 6px;min-width:18px;text-align:center;}
-.dd-menu{position:absolute;top:calc(100% + 5px);left:0;min-width:220px;background:var(--sur);border:1px solid var(--bdr2);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:400;overflow:hidden;}
-.dd-srch{padding:8px 8px 6px;border-bottom:1px solid var(--bdr);}
-.dd-srch input{width:100%;height:28px;padding:0 8px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t);outline:none;}
-.dd-srch input:focus{border-color:var(--accent);}
-.dd-list{max-height:210px;overflow-y:auto;}
-.dd-item{display:flex;align-items:center;gap:8px;padding:7px 11px;font-size:12px;cursor:pointer;color:var(--t);}
+.dd-badge{background:var(--accent);color:#fff;border-radius:10px;font-size:10px;font-weight:500;padding:1px 6px;}
+.dd-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:210px;background:var(--sur);border:1px solid var(--bdr2);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:400;overflow:hidden;}
+.dd-srch{padding:7px 8px 5px;border-bottom:1px solid var(--bdr);}
+.dd-srch input{width:100%;height:26px;padding:0 8px;font-size:12px;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t);outline:none;}
+.dd-list{max-height:200px;overflow-y:auto;}
+.dd-item{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
 .dd-item:hover{background:var(--sur2);}
-.dd-item.on{background:var(--sur2);}
 .dd-cb{width:13px;height:13px;border:1px solid var(--bdr2);border-radius:3px;background:var(--sur);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
 .dd-item.on .dd-cb{background:var(--accent);border-color:var(--accent);}
 .dd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.dd-foot{padding:6px 8px;border-top:1px solid var(--bdr);display:flex;gap:5px;}
-.dd-clr{flex:1;height:24px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-family:var(--sans);}
-.dd-all{flex:1;height:24px;font-size:11px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans);}
-.dd-empty{padding:14px;text-align:center;font-size:12px;color:var(--t3);}
+.dd-foot{padding:5px 8px;border-top:1px solid var(--bdr);display:flex;gap:5px;}
+.dd-clr{flex:1;height:22px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-family:var(--sans);}
+.dd-all{flex:1;height:22px;font-size:11px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans);}
+.dd-empty{padding:12px;text-align:center;font-size:12px;color:var(--t3);}
 
-/* sel strip */
-.sel-strip{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:5px 12px 7px;border-bottom:1px solid var(--bdr);}
+/* Selected strip */
+.sel-strip{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:5px 12px 6px;border-bottom:1px solid var(--bdr);}
 .sel-tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:4px;font-size:11px;background:var(--sur2);border:1px solid var(--bdr);color:var(--t2);}
-.sel-tag .rm{cursor:pointer;color:var(--t3);line-height:1;}
+.sel-tag .rm{cursor:pointer;color:var(--t3);}
 .sel-tag .rm:hover{color:var(--t);}
 
-/* col toggles */
-.ck-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.cklbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin-right:4px;}
+/* Col toggles */
 .ck{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none;}
 .ck input{cursor:pointer;accent-color:var(--accent);}
 .ck:has(input:checked){color:var(--t);}
 .factions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-shrink:0;}
-.btn{height:32px;padding:0 13px;font-size:12px;font-family:var(--sans);font-weight:500;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
-.btn-pri{background:var(--accent);color:#fff;}
-.btn-pri:hover{background:var(--ahov);}
-.btn-gho{background:transparent;color:var(--t2);border:1px solid var(--bdr);}
-.btn-gho:hover{background:var(--sur2);}
+
+/* Buttons */
+.btn{height:30px;padding:0 12px;font-size:12px;font-family:var(--sans);font-weight:500;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.btn-pri{background:var(--accent);color:#fff;} .btn-pri:hover{background:var(--ahov);}
+.btn-gho{background:transparent;color:var(--t2);border:1px solid var(--bdr);} .btn-gho:hover{background:var(--sur2);}
 .btn-dan{background:var(--redbg);color:var(--red);border:1px solid #fca5a5;}
-.btn-sm{height:24px;padding:0 9px;font-size:11px;border-radius:6px;}
+.btn-sm{height:24px;padding:0 8px;font-size:11px;border-radius:6px;}
 .tabs{display:flex;gap:2px;background:var(--sur2);border-radius:8px;padding:3px;}
-.tab{height:26px;padding:0 12px;font-size:12px;font-family:var(--sans);font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
+.tab{height:24px;padding:0 11px;font-size:12px;font-family:var(--sans);font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
 .tab.on{background:var(--sur);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
-/* currency switcher */
-.cur-tabs{display:flex;gap:2px;}
-.cur-tab{height:28px;padding:0 12px;font-size:11px;font-family:var(--mono);font-weight:500;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t2);cursor:pointer;transition:all .12s;}
-.cur-tab:hover{border-color:var(--bdr2);color:var(--t);}
-.cur-tab.on{background:var(--accent);color:#fff;border-color:var(--accent);}
+/* View mode tabs */
+.view-mode-tabs{display:flex;gap:2px;background:var(--sur2);border-radius:8px;padding:3px;}
+.vm-tab{height:24px;padding:0 12px;font-size:12px;font-family:var(--sans);font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
+.vm-tab.on{background:var(--sur);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
-/* ── State ── */
+/* Currency tabs */
+.cur-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.cur-tab{height:28px;padding:0 12px;font-size:11px;font-family:var(--mono);font-weight:500;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:6px;}
+.cur-tab:hover{border-color:var(--bdr2);color:var(--t);}
+.cur-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.cur-tab.pinned{background:var(--abg);color:var(--accent);border-color:var(--accent);}
+.cur-pin-btn{font-size:10px;opacity:.7;cursor:pointer;}
+.cur-pin-btn:hover{opacity:1;}
+.compare-hint{font-size:11px;color:var(--t3);margin-left:4px;}
+
+/* State */
 .state{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:60px;text-align:center;color:var(--t2);}
 .spin{width:26px;height:26px;border:2px solid var(--bdr);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── Table ── */
-.tbl-wrap{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;}
-.tbl-scroll{overflow-x:auto;}
+/* Table wrapper with sticky */
+.tbl-outer{overflow:auto;border:1px solid var(--bdr);border-radius:12px;background:var(--sur);max-height:calc(100vh - 320px);}
 table{width:100%;border-collapse:collapse;font-size:12px;}
-thead th{background:var(--sur2);color:var(--t2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--bdr);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th{background:var(--sur2);color:var(--t2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--bdr);white-space:nowrap;cursor:pointer;user-select:none;
+  position:sticky;top:0;z-index:10;}
 thead th:hover{color:var(--t);}
 thead th.sorted{color:var(--t);}
 thead th.r{text-align:right;}
 thead th.orig-h{text-align:right;color:var(--t3)!important;}
+/* Sticky first column */
+th.sticky-col,td.sticky-col{position:sticky;left:0;z-index:5;background:var(--sur);}
+thead th.sticky-col{z-index:15;background:var(--sur2);}
+tbody tr:hover td.sticky-col{background:var(--sur2);}
 .sarr{font-size:9px;margin-left:2px;opacity:.4;}
 thead th.sorted .sarr{opacity:1;}
+/* Cur group header */
+thead tr.cur-hdr th{background:#f0f3ff;font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;padding:4px 10px;border-bottom:none;}
 tbody tr{border-bottom:1px solid var(--bdr);}
 tbody tr:last-child{border-bottom:none;}
 tbody tr:hover{background:var(--sur2);}
@@ -135,18 +150,16 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 .b-fish{background:#dcfce7;color:#166534;} .b-poker{background:#fce7f3;color:#9d174d;}
 .b-mini{background:#ffedd5;color:#9a3412;} .b-esports{background:#e0f2fe;color:#0c4a6e;}
 .b-cock{background:#fee2e2;color:#991b1b;}
-.src-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;background:var(--sur2);border:1px solid var(--bdr);color:var(--t2);font-family:var(--mono);}
-.rc-click{text-align:right;cursor:pointer;}
-.rc-click:hover{background:var(--abg);}
-.null-cell{text-align:center;color:var(--t3);cursor:pointer;font-size:14px;}
-.null-cell:hover{color:var(--accent);}
+.src-tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;background:var(--sur2);border:1px solid var(--bdr);color:var(--t2);font-family:var(--mono);}
+.rc-click{text-align:right;cursor:pointer;} .rc-click:hover{background:var(--abg);}
+.null-cell{text-align:center;color:var(--t3);cursor:pointer;font-size:14px;} .null-cell:hover{color:var(--accent);}
 .profit{font-size:10px;color:var(--green);margin-top:1px;}
+.na-val{color:var(--t3);font-size:11px;}
 .cy{color:var(--green);} .cn2{color:var(--t3);}
-.na-cell{text-align:right;color:var(--t3);font-size:11px;}
 .abtns{display:flex;gap:4px;justify-content:center;}
-.tbl-footer{padding:9px 14px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);}
+.tbl-footer{padding:8px 14px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);}
 
-/* site view */
+/* Site cards */
 .site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
 .sc{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;}
 .sc-head{padding:12px 16px 10px;background:var(--sur2);border-bottom:1px solid var(--bdr);}
@@ -159,38 +172,53 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 .sc-lbl{color:var(--t2);} .sc-val{font-weight:500;} .sc-val.warn{color:var(--yellow);}
 .sc-count{margin-top:8px;padding:6px 12px;background:var(--abg);border-radius:8px;font-size:11px;color:var(--accent);font-weight:500;text-align:center;}
 
-/* modal */
+/* Modal */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--sur);border-radius:16px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22);}
-.mo-hd{padding:18px 22px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sur);z-index:10;}
+.modal{background:var(--sur);border-radius:16px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22);}
+.mo-hd{padding:16px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sur);z-index:10;}
 .mo-title{font-size:15px;font-weight:600;}
 .mo-x{background:none;border:none;font-size:20px;color:var(--t2);cursor:pointer;padding:2px 6px;border-radius:6px;}
 .mo-x:hover{background:var(--sur2);}
-.mo-body{padding:20px 22px;}
-.mo-foot{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--sur);}
-.mo-sec{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin:18px 0 12px;}
+.mo-body{padding:18px 20px;}
+.mo-foot{padding:12px 20px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--sur);}
+.mo-sec{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin:16px 0 12px;}
 .mo-sec:first-child{margin-top:0;}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.fg4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
 .fgp{display:flex;flex-direction:column;gap:4px;}
 .fgp.full{grid-column:1/-1;}
 .fl{font-size:10px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;}
-.fi{height:34px;padding:0 9px;font-size:13px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;width:100%;}
+.fi{height:32px;padding:0 9px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;width:100%;}
 .fi:focus{border-color:var(--accent);background:#fff;}
-.fsel{height:34px;padding:0 9px;font-size:13px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;cursor:pointer;width:100%;}
+.fi:disabled{opacity:.5;cursor:not-allowed;}
+.fsel{height:32px;padding:0 9px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;cursor:pointer;width:100%;}
 .fsel:focus{border-color:var(--accent);}
+
+/* Currency rate blocks in modal */
+.cur-block{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:8px;}
+.cur-block:last-child{margin-bottom:0;}
+.cb-head{padding:8px 12px;background:var(--sur2);display:flex;align-items:center;justify-content:space-between;}
+.cb-code{font-size:12px;font-weight:600;font-family:var(--mono);}
+.cb-unsupported{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.cb-body{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;}
+.cb-body.dim{opacity:.3;pointer-events:none;}
+
+/* Site blocks in modal */
 .site-block{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:8px;}
 .site-block:last-child{margin-bottom:0;}
-.sb-hd{padding:9px 13px;background:var(--sur2);display:flex;align-items:center;justify-content:space-between;}
-.sb-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.sb-hd{padding:8px 12px;background:var(--sur2);display:flex;align-items:center;justify-content:space-between;}
+.sb-name{font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;}
 .sb-id{font-size:10px;font-family:var(--mono);color:var(--t2);font-weight:400;}
-.sb-tog{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2);}
-.tog-track{width:30px;height:16px;border-radius:8px;background:var(--bdr2);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
-.tog-track.on{background:var(--accent);}
-.tog-thumb{width:12px;height:12px;border-radius:6px;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;}
-.tog-track.on .tog-thumb{left:16px;}
-.sb-body{padding:10px 13px;display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.sb-tog{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.tog{width:28px;height:15px;border-radius:8px;background:var(--bdr2);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
+.tog.on{background:var(--accent);}
+.tog-th{width:11px;height:11px;border-radius:6px;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;}
+.tog.on .tog-th{left:15px;}
+.sb-body{padding:10px 12px;display:grid;grid-template-columns:1fr;gap:8px;}
 .sb-body.dim{opacity:.3;pointer-events:none;}
+.sb-rate-info{font-size:11px;color:var(--t3);margin-top:4px;}
+
+/* Toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--t);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.err{background:var(--red);}
@@ -198,7 +226,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 </head>
 <body>
 
-<!-- ── Login screen ── -->
+<!-- Login -->
 <div class="login-screen" id="loginScreen">
   <div class="login-card">
     <div class="login-logo"><div class="login-logo-dot"></div></div>
@@ -211,138 +239,89 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>贏界 Wingea · 遊戲抽點表</div>
-  <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
-  <div id="userInfo" style="display:flex;align-items:center;margin-left:16px;"></div>
+  <div class="hdr-right">
+    <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
+    <div id="userInfo"></div>
+  </div>
 </header>
 
 <div class="page">
 <div class="filter-bar">
-
-  <!-- 搜尋 -->
   <div class="frow">
     <div class="flbl">搜尋</div>
     <div class="fcontent">
-      <div class="srch">
-        <span class="sicon">⌕</span>
-        <input type="text" id="q" placeholder="供應商名稱、provider_code、遊戲來源…" oninput="render()">
-      </div>
+      <div class="srch"><span class="sicon">⌕</span><input type="text" id="q" placeholder="供應商名稱、provider_code、遊戲來源…" oninput="render()"></div>
     </div>
   </div>
-
-  <!-- 類別 -->
   <div class="frow">
     <div class="flbl">類別</div>
     <div class="fcontent">
       <div class="dd" id="dd_cat">
-        <div class="dd-btn" id="dd_cat_btn" onclick="toggleDD('cat')">
-          類別 <span class="dd-badge" id="dd_cat_badge" style="display:none">0</span>
-        </div>
+        <div class="dd-btn" id="dd_cat_btn" onclick="toggleDD('cat')">類別 <span class="dd-badge" id="dd_cat_badge" style="display:none"></span></div>
         <div class="dd-menu" id="dd_cat_menu" style="display:none">
           <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('cat',this.value)" onclick="event.stopPropagation()"></div>
           <div class="dd-list" id="dd_cat_list"></div>
-          <div class="dd-foot">
-            <button class="dd-clr" onclick="clearDD('cat');event.stopPropagation()">清除</button>
-            <button class="dd-all" onclick="allDD('cat');event.stopPropagation()">全選</button>
-          </div>
+          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('cat');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('cat');event.stopPropagation()">全選</button></div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- 遊戲來源 -->
   <div class="frow">
     <div class="flbl">遊戲來源</div>
     <div class="fcontent">
       <div class="dd" id="dd_src">
-        <div class="dd-btn" id="dd_src_btn" onclick="toggleDD('src')">
-          遊戲來源 <span class="dd-badge" id="dd_src_badge" style="display:none">0</span>
-        </div>
+        <div class="dd-btn" id="dd_src_btn" onclick="toggleDD('src')">遊戲來源 <span class="dd-badge" id="dd_src_badge" style="display:none"></span></div>
         <div class="dd-menu" id="dd_src_menu" style="display:none">
           <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('src',this.value)" onclick="event.stopPropagation()"></div>
           <div class="dd-list" id="dd_src_list"></div>
-          <div class="dd-foot">
-            <button class="dd-clr" onclick="clearDD('src');event.stopPropagation()">清除</button>
-            <button class="dd-all" onclick="allDD('src');event.stopPropagation()">全選</button>
-          </div>
+          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('src');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('src');event.stopPropagation()">全選</button></div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- 站點 -->
   <div class="frow">
     <div class="flbl">站點</div>
     <div class="fcontent">
       <div class="dd" id="dd_site">
-        <div class="dd-btn" id="dd_site_btn" onclick="toggleDD('site')">
-          站點 <span class="dd-badge" id="dd_site_badge" style="display:none">0</span>
-        </div>
+        <div class="dd-btn" id="dd_site_btn" onclick="toggleDD('site')">站點 <span class="dd-badge" id="dd_site_badge" style="display:none"></span></div>
         <div class="dd-menu" id="dd_site_menu" style="display:none">
           <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('site',this.value)" onclick="event.stopPropagation()"></div>
           <div class="dd-list" id="dd_site_list"></div>
-          <div class="dd-foot">
-            <button class="dd-clr" onclick="clearDD('site');event.stopPropagation()">清除</button>
-            <button class="dd-all" onclick="allDD('site');event.stopPropagation()">全選</button>
-          </div>
+          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('site');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('site');event.stopPropagation()">全選</button></div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- 已選標籤 -->
-  <div id="selStrip" style="display:none" class="sel-strip"></div>
-
-  <!-- 幣別 + 費率欄位 + 欄位顯示 + 操作 -->
-  <div class="frow">
-    <div class="flbl">幣別</div>
-    <div class="fcontent">
-      <div class="cur-tabs" id="curTabs">
-        <button class="cur-tab on" onclick="setCur('CNY',this)">CNY</button>
-        <button class="cur-tab" onclick="setCur('VND',this)">VND</button>
-        <button class="cur-tab" onclick="setCur('USD',this)">USD</button>
-        <button class="cur-tab" onclick="setCur('INR',this)">INR</button>
-        <button class="cur-tab" onclick="setCur('KRW',this)">KRW</button>
-        <button class="cur-tab" onclick="setCur('PHP',this)">PHP</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="frow">
-    <div class="flbl">費率欄位</div>
-    <div class="fcontent">
-      <div class="ck-row">
-        <label class="ck"><input type="checkbox" id="ck_p1" checked onchange="render()"> 方案一</label>
-        <label class="ck"><input type="checkbox" id="ck_p2" checked onchange="render()"> 方案二</label>
-        <label class="ck"><input type="checkbox" id="ck_p3" onchange="render()"> 方案三</label>
-        <label class="ck"><input type="checkbox" id="ck_official" checked onchange="render()"> 官方費率</label>
-        <label class="ck"><input type="checkbox" id="ck_orig" checked onchange="render()"> 原始費率</label>
-      </div>
-    </div>
-  </div>
-
+  <div id="selStripRow" style="display:none" class="sel-strip"></div>
   <div class="frow">
     <div class="flbl">顯示欄位</div>
     <div class="fcontent">
-      <div class="ck-row">
-        <label class="ck"><input type="checkbox" id="ck_src"      checked onchange="render()"> 遊戲來源</label>
-        <label class="ck"><input type="checkbox" id="ck_prov"     checked onchange="render()"> provider_code</label>
-        <label class="ck"><input type="checkbox" id="ck_ctrl"     checked onchange="render()"> 可控</label>
-        <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 全域啟用</label>
-        <label class="ck"><input type="checkbox" id="ck_cat_icon"  onchange="render()"> category_icon</label>
-        <label class="ck"><input type="checkbox" id="ck_bal_icon"  onchange="render()"> balance_icon</label>
-        <label class="ck"><input type="checkbox" id="ck_ext"       onchange="render()"> ext_category_code</label>
-      </div>
+      <label class="ck"><input type="checkbox" id="ck_src" checked onchange="render()"> 遊戲來源</label>
+      <label class="ck"><input type="checkbox" id="ck_prov" checked onchange="render()"> provider_code</label>
+      <label class="ck"><input type="checkbox" id="ck_ctrl" checked onchange="render()"> 可控</label>
+      <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 全域啟用</label>
+      <label class="ck"><input type="checkbox" id="ck_cat_icon" onchange="render()"> category_icon</label>
+      <label class="ck"><input type="checkbox" id="ck_bal_icon" onchange="render()"> balance_icon</label>
+      <label class="ck"><input type="checkbox" id="ck_ext" onchange="render()"> ext_category_code</label>
       <div class="factions">
         <button class="btn btn-gho" onclick="clearAll()">清除篩選</button>
         <button class="btn btn-pri" onclick="openAdd()">＋ 新增供應商</button>
-        <div class="tabs">
-          <button class="tab on" id="btnT" onclick="switchView('table')">費率表</button>
-          <button class="tab"    id="btnS" onclick="switchView('site')">站點統整</button>
+        <div class="view-mode-tabs">
+          <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
+          <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
+          <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
         </div>
       </div>
     </div>
   </div>
-
+  <!-- Currency tabs (only shown in currency mode) -->
+  <div class="frow" id="curTabRow">
+    <div class="flbl">幣別</div>
+    <div class="fcontent">
+      <div class="cur-bar" id="curBar"></div>
+      <span class="compare-hint" id="compareHint"></span>
+    </div>
+  </div>
 </div>
 
 <div id="mainContent"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
@@ -384,19 +363,14 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
       <div class="fgp"><label class="fl">category_icon</label><input class="fi" id="f_cat_icon" type="text"></div>
       <div class="fgp full"><label class="fl">balance_icon</label><input class="fi" id="f_bal_icon" type="text"></div>
     </div>
-    <div class="mo-sec">基礎費率方案</div>
-    <div class="fg4">
-      <div class="fgp"><label class="fl">方案一費率</label><input class="fi" id="f_p1" type="number" step="0.001"></div>
-      <div class="fgp"><label class="fl">方案二費率</label><input class="fi" id="f_p2" type="number" step="0.001"></div>
-      <div class="fgp"><label class="fl">方案三費率</label><input class="fi" id="f_p3" type="number" step="0.001"></div>
-      <div class="fgp"><label class="fl">官方原始費率</label><input class="fi" id="f_official" type="number" step="0.001"></div>
-    </div>
+    <div class="mo-sec">各幣別費率設定</div>
+    <div id="curBlocks"></div>
     <div class="mo-sec">各站點費率與啟用設定</div>
     <div id="siteBlocks"></div>
   </div>
   <div class="mo-foot">
     <button class="btn btn-gho" onclick="closeMo()">取消</button>
-    <button class="btn btn-pri" id="moSaveBtn" onclick="saveMo()">儲存所有變更</button>
+    <button class="btn btn-pri" id="moSaveBtn" onclick="saveMo()">儲存</button>
   </div>
 </div>
 </div>
@@ -405,14 +379,18 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 
 <script>
 // ══════════════════════════════════════════════════════
-//  ⚙️  換成你的 Apps Script Web App 網址
 const API_URL = 'https://script.google.com/a/macros/wingea.vip/s/AKfycbykkmL9TfhqxhFb7WZWPkrZjwqiTPrIQq_RyuhoBg6Q9sIUABW4JrcKsw6t2a-vc32f7g/exec';
+const ALLOWED_DOMAIN = 'wingea.vip';
+const TOKEN_KEY = 'wg_auth_token';
+const TOKEN_EXP_KEY = 'wg_auth_exp';
+const TOKEN_NAME_KEY = 'wg_auth_name';
+const TOKEN_PIC_KEY  = 'wg_auth_pic';
+const TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 // ══════════════════════════════════════════════════════
 
 const SITE_ORDER = ['CNY001','CNY002','CNY003','CNY004','CNY005','VND001','USDT001','INR001'];
 const SITE_LABEL = {CNY001:'新博 CNY001',CNY002:'庫里南 CNY002',CNY003:'688娛樂 CNY003',CNY004:'Lebo-CNY CNY004',CNY005:'X11Club CNY005',VND001:'Lucky7 VND001',USDT001:'Lebo-USDT USDT001',INR001:'星辰XC INR001'};
 const SITE_NAME  = {CNY001:'新博國際',CNY002:'庫里南',CNY003:'688娛樂',CNY004:'Lebo-CNY',CNY005:'X11Club',VND001:'Lucky7',USDT001:'Lebo-USDT',INR001:'星辰XC'};
-const SITE_KEY   = {CNY001:'新博 CNY001',CNY002:'庫里南 CNY002',CNY003:'688娛樂 CNY003',CNY004:'Lebo-CNY CNY004',CNY005:'X11Club CNY005',VND001:'Lucky7 VND001',USDT001:'Lebo-USDT USDT001',INR001:'星辰XC INR001'};
 const CAT_OPTS = [
   {v:'slots',l:'Slots 電子',dot:'#1d4ed8'},{v:'live',l:'Live 視訊',dot:'#065f46'},
   {v:'sports',l:'Sports 體育',dot:'#92400e'},{v:'lottery',l:'Lottery 彩票',dot:'#5b21b6'},
@@ -420,54 +398,163 @@ const CAT_OPTS = [
   {v:'mini game',l:'Mini Game',dot:'#9a3412'},{v:'e-sports',l:'E-Sports',dot:'#0c4a6e'},
   {v:'cockfight',l:'Cockfight',dot:'#991b1b'},
 ];
-const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(v=>({v,l:v}));
-const SITE_OPTS = SITE_ORDER.map(v=>({v,l:SITE_LABEL[v]}));
+const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(function(v){return{v:v,l:v};});
+const SITE_OPTS = SITE_ORDER.map(function(v){return{v:v,l:SITE_LABEL[v]};});
 const CAT_CLS = {slots:'b-slots',live:'b-live',sports:'b-sports',lottery:'b-lottery',fish:'b-fish',poker:'b-poker','mini game':'b-mini','e-sports':'b-esports',cockfight:'b-cock'};
 const CAT_LBL = {slots:'Slots',live:'Live',sports:'Sports',lottery:'彩票',fish:'Fish',poker:'棋牌','mini game':'Mini','e-sports':'E-Sports',cockfight:'鬥雞'};
-const CUR_ORIG = {CNY:'原始費率CNY',VND:'原始費率VND',USD:'原始費率USD/USDT',INR:'原始費率INR',KRW:'原始費率KRW',PHP:'原始費率PHP'};
-
 const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:SITE_OPTS}};
-const ddSel  = {cat:new Set(), src:new Set(), site:new Set()};
-const ddOpen = {cat:false, src:false, site:false};
 
-let DATA_BY_CUR = {}, SITE_INFO = [], curCur = 'CNY';
-let view='table', sortK=null, sortD=1, editingId=null;
+let DATA=[], SITE_INFO=[], CURRENCIES=[];
+let viewMode='currency'; // 'currency' | 'site_rate' | 'site_overview'
+let activeCur=''; // active single currency tab
+let pinnedCurs=new Set(); // pinned currencies for comparison
+let sortK=null, sortD=1, editingId=null;
+const ddSel={cat:new Set(),src:new Set(),site:new Set()};
+const ddOpen={cat:false,src:false,site:false};
 
-// ── API ───────────────────────────────────────────────
+// ── Auth ──────────────────────────────────────────────
+function initAuth(){
+  // Check stored token
+  const exp = parseInt(localStorage.getItem(TOKEN_EXP_KEY)||'0');
+  if(exp > Date.now()){
+    const name = localStorage.getItem(TOKEN_NAME_KEY)||'';
+    const pic  = localStorage.getItem(TOKEN_PIC_KEY)||'';
+    showUser(name, pic);
+    loadAll();
+    return;
+  }
+  // Show Google sign-in
+  google.accounts.id.initialize({client_id:'1031858151521-k4a6p25nd81oiuio7id9d9p5odacgqdr.apps.googleusercontent.com',callback:handleCredential,auto_select:true});
+  google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'zh-TW',width:280});
+  google.accounts.id.prompt();
+}
+
+function handleCredential(response){
+  const base64url = response.credential.split('.')[1];
+  const base64 = base64url.replace(/-/g,'+').replace(/_/g,'/');
+  const payload = JSON.parse(atob(base64));
+  const email = payload.email||'';
+  const domain = email.split('@')[1]||'';
+  if(domain !== ALLOWED_DOMAIN){
+    const err=document.getElementById('loginErr');
+    err.textContent='帳號 '+email+' 沒有存取權限，請用 @wingea.vip 帳號登入。';
+    err.style.display='block';
+    return;
+  }
+  // Store token for 7 days
+  localStorage.setItem(TOKEN_EXP_KEY, String(Date.now()+TOKEN_TTL));
+  localStorage.setItem(TOKEN_NAME_KEY, payload.name||email);
+  localStorage.setItem(TOKEN_PIC_KEY, payload.picture||'');
+  showUser(payload.name||email, payload.picture||'');
+  loadAll();
+}
+
+function showUser(name, pic){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('userInfo').innerHTML=
+    (pic?`<img src="${pic}" class="user-avatar">`:'') +
+    `<span class="user-info" style="font-size:12px;color:var(--t2)">${esc(name)}</span>`+
+    `<button class="btn-signout" onclick="signOut()">登出</button>`;
+}
+
+function signOut(){
+  localStorage.removeItem(TOKEN_EXP_KEY);
+  localStorage.removeItem(TOKEN_NAME_KEY);
+  localStorage.removeItem(TOKEN_PIC_KEY);
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('userInfo').innerHTML='';
+  document.getElementById('mainContent').innerHTML='<div class="state"><div class="spin"></div>請先登入</div>';
+  if(typeof google!=='undefined'&&google.accounts) google.accounts.id.disableAutoSelect();
+}
+
+function waitForGoogle(){
+  if(typeof google!=='undefined'&&google.accounts&&google.accounts.id) initAuth();
+  else setTimeout(waitForGoogle,100);
+}
+waitForGoogle();
+
+// ── API ──────────────────────────────────────────────
 async function apiGet(a){const r=await fetch(`${API_URL}?action=${a}`);return r.json();}
 async function apiPost(b){
-  // Apps Script 不支援跨域 POST，改用 GET + payload 參數
-  const encoded = encodeURIComponent(JSON.stringify(b));
-  const r = await fetch(`${API_URL}?payload=${encoded}`);
+  const encoded=encodeURIComponent(JSON.stringify(b));
+  const r=await fetch(`${API_URL}?payload=${encoded}`);
   return r.json();
 }
 
 async function loadAll(){
   try{
-    const [pRes,sRes]=await Promise.all([apiGet('getAll'),apiGet('getSites')]);
-    const all=pRes.providers||[];
+    document.getElementById('syncLabel').textContent='載入中…';
+    const [pRes,sRes,cRes]=await Promise.all([apiGet('getAll'),apiGet('getSites'),apiGet('getCurrencies')]);
+    DATA=pRes.providers||[];
     SITE_INFO=sRes.sites||[];
-    // group by currency — for now all providers share same rate plans; orig differs per currency sheet
-    // We'll load per-currency data from separate endpoint or just show CNY data with orig from master
-    const CUR_KEY={CNY:'orig_cny',VND:'orig_vnd',USD:'orig_usd',INR:'orig_inr',KRW:'orig_krw',PHP:'orig_php'};
-    ['CNY','VND','USD','INR','KRW','PHP'].forEach(cur=>{
-      DATA_BY_CUR[cur]=all.map(p=>({...p, orig: p[CUR_KEY[cur]]??null}));
-    });
+    CURRENCIES=cRes.currencies||[];
+    // Set default active currency
+    if(CURRENCIES.length&&!activeCur) activeCur=CURRENCIES[0].code;
+    buildCurBar();
+    buildDDFromData();
     document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
     render();
   }catch(e){
-    document.getElementById('mainContent').innerHTML=`<div class="state"><div style="font-size:28px;margin-bottom:10px">⚠</div><div style="color:var(--red);margin-bottom:6px">無法連線</div><div style="font-size:12px;color:var(--t3)">請確認 Apps Script 已部署並填入 API_URL<br>${e.message}</div></div>`;
+    document.getElementById('mainContent').innerHTML=`<div class="state"><div style="font-size:28px;margin-bottom:10px">⚠</div><div style="color:var(--red);margin-bottom:6px">無法連線</div><div style="font-size:12px;color:var(--t3)">${e.message}</div></div>`;
     document.getElementById('syncLabel').textContent='連線失敗';
   }
 }
 
+function buildDDFromData(){
+  // Extract unique sources from data
+  const srcs=[...new Set(DATA.map(function(d){return d.source;}).filter(Boolean))].sort();
+  DD_CFG.src.opts=srcs.map(function(v){return{v:v,l:v};});
+}
+
+// ── Currency bar ──────────────────────────────────────
+function buildCurBar(){
+  const bar=document.getElementById('curBar');
+  bar.innerHTML=CURRENCIES.map(function(cur){
+    const isActive=activeCur===cur.code;
+    const isPinned=pinnedCurs.has(cur.code);
+    const cls=isPinned?'cur-tab pinned':isActive?'cur-tab active':'cur-tab';
+    return `<button class="${cls}" id="curtab_${cur.code}" onclick="clickCurTab('${cur.code}',event)">
+      ${cur.label}
+      <span class="cur-pin-btn" onclick="pinCur('${cur.code}',event)" title="${isPinned?'取消固定':'固定比較'}">${isPinned?'📌':'📌'}</span>
+    </button>`;
+  }).join('');
+  const pinCount=pinnedCurs.size;
+  document.getElementById('compareHint').textContent=pinCount>1?`📌 比較中：${pinCount} 個幣別`:'';
+}
+
+function clickCurTab(code, e){
+  if(e.target.classList.contains('cur-pin-btn')) return;
+  activeCur=code;
+  buildCurBar();
+  render();
+}
+
+function pinCur(code, e){
+  e.stopPropagation();
+  if(pinnedCurs.has(code)) pinnedCurs.delete(code);
+  else pinnedCurs.add(code);
+  buildCurBar();
+  render();
+}
+
+// ── View mode ─────────────────────────────────────────
+function switchViewMode(v){
+  viewMode=v;
+  document.getElementById('vm_cur').className='vm-tab'+(v==='currency'?' on':'');
+  document.getElementById('vm_site').className='vm-tab'+(v==='site_rate'?' on':'');
+  document.getElementById('vm_overview').className='vm-tab'+(v==='site_overview'?' on':'');
+  document.getElementById('curTabRow').style.display=v==='currency'?'':'none';
+  render();
+}
+
 // ── Dropdown ─────────────────────────────────────────
-function renderDDList(type, query=''){
-  const opts=DD_CFG[type].opts.filter(o=>o.l.toLowerCase().includes(query.toLowerCase())||o.v.toLowerCase().includes(query.toLowerCase()));
+function renderDDList(type,query){
+  query=query||'';
+  const opts=DD_CFG[type].opts.filter(function(o){return(o.l||o.v).toLowerCase().includes(query.toLowerCase());});
   const sel=ddSel[type];
   const el=document.getElementById('dd_'+type+'_list');
-  if(!opts.length){el.innerHTML=`<div class="dd-empty">無結果</div>`;return;}
-  el.innerHTML=opts.map(o=>{
+  if(!opts.length){el.innerHTML='<div class="dd-empty">無結果</div>';return;}
+  el.innerHTML=opts.map(function(o){
     const on=sel.has(o.v);
     const dot=o.dot?`<span class="dd-dot" style="background:${o.dot}"></span>`:'';
     return `<div class="dd-item${on?' on':''}" onclick="toggleDDOpt('${type}','${o.v}');event.stopPropagation()">
@@ -475,168 +562,192 @@ function renderDDList(type, query=''){
     </div>`;
   }).join('');
 }
-
 function toggleDD(type){
   const was=ddOpen[type];
-  Object.keys(ddOpen).forEach(k=>{
-    if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}
-  });
-  if(!was){
-    ddOpen[type]=true;
-    document.getElementById('dd_'+type+'_menu').style.display='';
-    document.getElementById('dd_'+type+'_btn').classList.add('open');
-    renderDDList(type);
-  }
+  Object.keys(ddOpen).forEach(function(k){if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}});
+  if(!was){ddOpen[type]=true;document.getElementById('dd_'+type+'_menu').style.display='';document.getElementById('dd_'+type+'_btn').classList.add('open');renderDDList(type);}
 }
-
-function toggleDDOpt(type,val){
-  const s=ddSel[type];
-  if(s.has(val))s.delete(val);else s.add(val);
-  renderDDList(type);updateBadge(type);updateSelStrip();render();
-}
+function toggleDDOpt(type,val){const s=ddSel[type];if(s.has(val))s.delete(val);else s.add(val);renderDDList(type);updateBadge(type);updateSelStrip();render();}
 function clearDD(type){ddSel[type].clear();renderDDList(type);updateBadge(type);updateSelStrip();render();}
-function allDD(type){DD_CFG[type].opts.forEach(o=>ddSel[type].add(o.v));renderDDList(type);updateBadge(type);updateSelStrip();render();}
-
-function updateBadge(type){
-  const n=ddSel[type].size;
-  const b=document.getElementById('dd_'+type+'_badge');
-  b.textContent=n;b.style.display=n?'':'none';
-  document.getElementById('dd_'+type+'_btn').classList.toggle('has',n>0);
-}
-
+function allDD(type){DD_CFG[type].opts.forEach(function(o){ddSel[type].add(o.v);});renderDDList(type);updateBadge(type);updateSelStrip();render();}
+function updateBadge(type){const n=ddSel[type].size;const b=document.getElementById('dd_'+type+'_badge');b.textContent=n;b.style.display=n?'':'none';document.getElementById('dd_'+type+'_btn').classList.toggle('has',n>0);}
 function updateSelStrip(){
-  const strip=document.getElementById('selStrip');
+  const strip=document.getElementById('selStripRow');
   const tags=[];
-  [{k:'cat',opts:CAT_OPTS},{k:'src',opts:SRC_OPTS},{k:'site',opts:SITE_OPTS}].forEach(({k,opts})=>{
-    ddSel[k].forEach(v=>{
-      const o=opts.find(x=>x.v===v);
-      const lbl=o?o.l:v;
-      tags.push(`<span class="sel-tag">${lbl}<span class="rm" onclick="toggleDDOpt('${k}','${v}')"> ×</span></span>`);
-    });
+  [{k:'cat',opts:CAT_OPTS},{k:'src',opts:DD_CFG.src.opts},{k:'site',opts:SITE_OPTS}].forEach(function(cfg){
+    ddSel[cfg.k].forEach(function(v){const o=cfg.opts.find(function(x){return x.v===v;});const lbl=o?o.l:v;tags.push(`<span class="sel-tag">${lbl}<span class="rm" onclick="toggleDDOpt('${cfg.k}','${v}')"> ×</span></span>`);});
   });
   strip.innerHTML=tags.join('');
   strip.style.display=tags.length?'flex':'none';
 }
+function clearAll(){['cat','src','site'].forEach(function(t){ddSel[t].clear();updateBadge(t);});updateSelStrip();document.getElementById('q').value='';render();}
+document.addEventListener('click',function(e){if(!e.target.closest('.dd')){Object.keys(ddOpen).forEach(function(k){if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}});}});
 
-function clearAll(){
-  ['cat','src','site'].forEach(t=>{ddSel[t].clear();updateBadge(t);});
-  updateSelStrip();
-  document.getElementById('q').value='';
-  render();
-}
-
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.dd')){
-    Object.keys(ddOpen).forEach(k=>{
-      if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}
-    });
-  }
-});
-
-// ── Currency ──────────────────────────────────────────
-function setCur(cur, btn){
-  curCur=cur;
-  document.querySelectorAll('.cur-tab').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  render();
-}
-
-// ── Filter + Sort ─────────────────────────────────────
-function ck(id){return document.getElementById(id)?.checked;}
-function pct(v){
-  if(v===null||v===undefined)return null;
-  if(v==='N/A')return 'N/A';
-  return (v*100).toFixed(1)+'%';
-}
+// ── Filter & Sort ─────────────────────────────────────
+function ck(id){return document.getElementById(id)&&document.getElementById(id).checked;}
+function pct(v){if(v===null||v===undefined)return null;if(v==='N/A')return 'N/A';return (v*100).toFixed(1)+'%';}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function getFiltered(){
   const q=document.getElementById('q').value.toLowerCase();
-  const data=DATA_BY_CUR[curCur]||[];
-  return data.filter(d=>{
+  return DATA.filter(function(d){
     if(q&&!d.en.toLowerCase().includes(q)&&!d.cn.includes(q)&&!(d.source||'').toLowerCase().includes(q)&&!(d.prov_code||'').toLowerCase().includes(q))return false;
     if(ddSel.cat.size&&!ddSel.cat.has(d.cat))return false;
     if(ddSel.src.size&&!ddSel.src.has(d.source))return false;
-    if(ddSel.site.size){
-      const has=[...ddSel.site].some(s=>{const sv=d.sites?.[s];return sv&&sv.r!==null;});
-      if(!has)return false;
-    }
+    if(ddSel.site.size){const has=[...ddSel.site].some(function(s){const sv=d.sites&&d.sites[s];return sv&&sv.r!==null;});if(!has)return false;}
     return true;
   });
 }
 
-function getActiveSites(){return ddSel.site.size?[...ddSel.site]:SITE_ORDER;}
-
 function doSort(k){if(sortK===k)sortD=-sortD;else{sortK=k;sortD=1;}render();}
 function sarr(k){if(sortK!==k)return'<span class="sarr">↕</span>';return`<span class="sarr">${sortD>0?'↑':'↓'}</span>`;}
-function th(k,l,ex=''){return`<th onclick="doSort('${k}')" class="${sortK===k?'sorted':''}" ${ex}>${l}${sarr(k)}</th>`;}
+function th(k,l,ex){ex=ex||'';return`<th onclick="doSort('${k}')" class="${sortK===k?'sorted':''}" ${ex}>${l}${sarr(k)}</th>`;}
 
+// ── Render ────────────────────────────────────────────
 function render(){
-  if(!Object.keys(DATA_BY_CUR).length)return;
+  if(!DATA.length)return;
   let data=getFiltered();
-  const sites=getActiveSites();
   if(sortK){
-    data.sort((a,b)=>{
+    data.sort(function(a,b){
       if(sortK==='en')return sortD*a.en.localeCompare(b.en);
       if(sortK==='cat')return sortD*a.cat.localeCompare(b.cat);
       if(sortK==='src')return sortD*(a.source||'').localeCompare(b.source||'');
-      if(sortK==='p1')return sortD*((a.p1??9)-(b.p1??9));
-      if(sortK==='p2')return sortD*((a.p2??9)-(b.p2??9));
-      if(sortK==='p3')return sortD*((a.p3??9)-(b.p3??9));
-      const av=(a.sites?.[sortK]?.r??9),bv=(b.sites?.[sortK]?.r??9);
-      return sortD*(av-bv);
+      return 0;
     });
   }
-  if(view==='table')renderTable(data,sites);
-  else renderSite(data);
+  if(viewMode==='currency') renderCurrencyTable(data);
+  else if(viewMode==='site_rate') renderSiteRateTable(data);
+  else renderSiteOverview(data);
 }
 
-function renderTable(data,sites){
-  const origLabel=CUR_ORIG[curCur]||'原始費率';
-  let head='<tr>'+th('en','供應商')+th('cat','類別');
-  if(ck('ck_src'))     head+=th('src','遊戲來源');
-  if(ck('ck_cat_icon'))head+='<th>category_icon</th>';
-  if(ck('ck_bal_icon'))head+='<th>balance_icon</th>';
-  if(ck('ck_prov'))    head+='<th>provider_code</th>';
-  if(ck('ck_ext'))     head+='<th>ext_category_code</th>';
-  if(ck('ck_ctrl'))    head+='<th style="text-align:center">可控</th>';
-  if(ck('ck_enabled')) head+='<th style="text-align:center">全域啟用</th>';
-  if(ck('ck_p1'))      head+=th('p1','方案一','style="text-align:right"');
-  if(ck('ck_p2'))      head+=th('p2','方案二','style="text-align:right"');
-  if(ck('ck_p3'))      head+=th('p3','方案三','style="text-align:right"');
-  if(ck('ck_official'))head+='<th class="orig-h">官方費率</th>';
-  if(ck('ck_orig'))    head+=`<th class="orig-h">${origLabel}</th>`;
-  sites.forEach(s=>head+=th(s,SITE_LABEL[s]?.split(' ')[0]||s,'style="text-align:right"'));
+function baseColumns(d){
+  let r=`<td class="sticky-col td-name" style="min-width:160px;max-width:180px">
+    <div class="td-en">${esc(d.en)}</div><div class="td-cn">${esc(d.cn)}</div>
+    ${d.note?`<div class="td-note">${esc(d.note)}</div>`:''}
+  </td>`;
+  r+=`<td><span class="badge ${CAT_CLS[d.cat]||'b-esports'}">${CAT_LBL[d.cat]||d.cat}</span></td>`;
+  if(ck('ck_src'))  r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
+  if(ck('ck_cat_icon'))r+=`<td class="mono">${d.cat_icon?esc(d.cat_icon.slice(0,20))+'…':'—'}</td>`;
+  if(ck('ck_bal_icon'))r+=`<td class="mono">${d.bal_icon?esc(d.bal_icon.slice(0,20))+'…':'—'}</td>`;
+  if(ck('ck_prov'))r+=`<td class="mono">${d.prov_code?`<span title="${esc(d.prov_code)}">${esc(d.prov_code)}</span>`:'—'}</td>`;
+  if(ck('ck_ext')) r+=`<td class="mono">${d.ext_cat||'—'}</td>`;
+  if(ck('ck_ctrl'))r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
+  if(ck('ck_enabled'))r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
+  return r;
+}
+
+function baseHead(){
+  let h='<th class="sticky-col">供應商</th><th>類別</th>';
+  if(ck('ck_src'))  h+='<th>遊戲來源</th>';
+  if(ck('ck_cat_icon'))h+='<th>category_icon</th>';
+  if(ck('ck_bal_icon'))h+='<th>balance_icon</th>';
+  if(ck('ck_prov'))h+='<th>provider_code</th>';
+  if(ck('ck_ext')) h+='<th>ext_category_code</th>';
+  if(ck('ck_ctrl'))h+='<th style="text-align:center">可控</th>';
+  if(ck('ck_enabled'))h+='<th style="text-align:center">全域啟用</th>';
+  return h;
+}
+
+function fmtRate(v){
+  if(v===null||v===undefined)return '<span class="na-val">—</span>';
+  if(v==='N/A')return '<span class="na-val">不支持</span>';
+  return pct(v);
+}
+
+// ── Currency table ────────────────────────────────────
+function renderCurrencyTable(data){
+  // Determine which currencies to show
+  const showCurs=[];
+  if(pinnedCurs.size>1){
+    CURRENCIES.forEach(function(c){if(pinnedCurs.has(c.code))showCurs.push(c);});
+  } else {
+    const found=CURRENCIES.find(function(c){return c.code===activeCur;});
+    if(found)showCurs.push(found);
+  }
+  if(!showCurs.length){document.getElementById('mainContent').innerHTML='<div class="state">請先選擇幣別</div>';return;}
+
+  const isCompare=showCurs.length>1;
+  let head='<tr>'+baseHead();
+  if(isCompare){
+    showCurs.forEach(function(cur){
+      head+=`<th colspan="5" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
+    });
+  } else {
+    head+='<th class="r">原始費率</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th>';
+  }
   head+='<th style="text-align:center">操作</th></tr>';
 
-  let rows='';
-  data.forEach(d=>{
-    const cc=CAT_CLS[d.cat]||'b-esports',cl=CAT_LBL[d.cat]||d.cat;
-    let r=`<tr><td style="max-width:170px"><div class="td-en">${esc(d.en)}</div><div class="td-cn">${esc(d.cn)}</div>${d.note?`<div class="td-note">${esc(d.note)}</div>`:''}</td>`;
-    r+=`<td><span class="badge ${cc}">${cl}</span></td>`;
-    if(ck('ck_src'))     r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
-    if(ck('ck_cat_icon'))r+=`<td class="mono">${d.cat_icon?`<span title="${d.cat_icon}">${d.cat_icon.slice(0,22)}…</span>`:'—'}</td>`;
-    if(ck('ck_bal_icon'))r+=`<td class="mono">${d.bal_icon?`<span title="${d.bal_icon}">${d.bal_icon.slice(0,20)}…</span>`:'—'}</td>`;
-    if(ck('ck_prov'))    r+=`<td class="mono">${d.prov_code?`<span title="${d.prov_code}">${d.prov_code}</span>`:'—'}</td>`;
-    if(ck('ck_ext'))     r+=`<td class="mono">${d.ext_cat||'—'}</td>`;
-    if(ck('ck_ctrl'))    r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
-    if(ck('ck_enabled')) r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
+  if(isCompare){
+    // second header row for sub-columns
+    head+='<tr class="cur-hdr"><th class="sticky-col"></th><th></th>';
+    if(ck('ck_src'))head+='<th></th>';
+    if(ck('ck_cat_icon'))head+='<th></th>';
+    if(ck('ck_bal_icon'))head+='<th></th>';
+    if(ck('ck_prov'))head+='<th></th>';
+    if(ck('ck_ext'))head+='<th></th>';
+    if(ck('ck_ctrl'))head+='<th></th>';
+    if(ck('ck_enabled'))head+='<th></th>';
+    showCurs.forEach(function(){
+      head+='<th class="r" style="border-left:2px solid #c7d2fe">原始</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th>';
+    });
+    head+='<th></th></tr>';
+  }
 
-    const fmtRate=(v)=>v===null?'<span style="color:var(--t3)">—</span>':v==='N/A'?'<span style="color:var(--t3)">不支持</span>':pct(v);
-    if(ck('ck_p1'))      r+=`<td class="td-rc">${fmtRate(d.p1)}</td>`;
-    if(ck('ck_p2'))      r+=`<td class="td-rc">${fmtRate(d.p2)}</td>`;
-    if(ck('ck_p3'))      r+=`<td class="td-rc">${fmtRate(d.p3)}</td>`;
-    if(ck('ck_official'))r+=`<td style="text-align:right;color:var(--t3);font-size:11px">${fmtRate(d.official)}</td>`;
-    if(ck('ck_orig'))    r+=`<td style="text-align:right;color:var(--t3);font-size:11px">${fmtRate(d.orig)}</td>`;
+  let rows=data.map(function(d){
+    let r='<tr>'+baseColumns(d);
+    if(isCompare){
+      showCurs.forEach(function(cur,ci){
+        const cd=(d.currencies&&d.currencies[cur.code])||{};
+        const borderStyle=ci===0?'border-left:2px solid #c7d2fe':'';
+        r+=`<td class="td-rc" style="${borderStyle}">${fmtRate(cd.orig)}</td>`;
+        r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
+        r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
+        r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
+        r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+      });
+    } else {
+      const cur=showCurs[0];
+      const cd=(d.currencies&&d.currencies[cur.code])||{};
+      r+=`<td class="td-rc">${fmtRate(cd.orig)}</td>`;
+      r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
+      r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
+      r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
+      r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+    }
+    r+=`<td class="td-ctr"><div class="abtns">
+      <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
+      <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
+    </div></td></tr>`;
+    return r;
+  }).join('');
 
-    sites.forEach(s=>{
-      const sv=d.sites?.[s];
+  document.getElementById('mainContent').innerHTML=`
+    <div class="tbl-outer">
+      <table><thead>${head}</thead><tbody>${rows||emptyRow()}</tbody></table>
+      <div class="tbl-footer">共 ${data.length} 筆　·　幣別：${showCurs.map(function(c){return c.label;}).join(' + ')}</div>
+    </div>`;
+}
+
+// ── Site rate table ───────────────────────────────────
+function renderSiteRateTable(data){
+  const activeSites=ddSel.site.size?[...ddSel.site]:SITE_ORDER;
+  let head='<tr>'+baseHead();
+  activeSites.forEach(function(s){
+    head+=`<th style="text-align:right">${SITE_LABEL[s].split(' ')[0]}</th>`;
+  });
+  head+='<th style="text-align:center">操作</th></tr>';
+
+  let rows=data.map(function(d){
+    let r='<tr>'+baseColumns(d);
+    activeSites.forEach(function(s){
+      const sv=(d.sites&&d.sites[s])||{};
       if(!sv||sv.r===null){
-        r+=`<td class="null-cell" onclick="editRate(${d.id},'${s}',null,null,null)">＋</td>`;
-      }else{
-        const ei=sv.enabled?`<span style="font-size:9px;color:${sv.enabled==='Y'?'var(--green)':'var(--t3)'}">${sv.enabled==='Y'?' ✓':' ✗'}</span>`:'';
-        r+=`<td class="rc-click" onclick="editRate(${d.id},'${s}',${sv.r},${sv.p},${JSON.stringify(sv.enabled||'')})">
-          <span style="font-size:12px">${pct(sv.r)}${ei}</span>${sv.p!==null?`<div class="profit">+${pct(sv.p)}</div>`:''}
+        r+=`<td class="null-cell" onclick="editSiteRate(${d.id},'${s}',null,null)">＋</td>`;
+      } else {
+        const profitStr=sv.p!==null&&sv.p!==undefined?`<div class="profit">+${pct(sv.p)}</div>`:'';
+        const enabledMark=sv.enabled==='Y'?'<span style="font-size:9px;color:var(--green)"> ✓</span>':sv.enabled==='N'?'<span style="font-size:9px;color:var(--t3)"> ✗</span>':'';
+        r+=`<td class="rc-click" onclick="editSiteRate(${d.id},'${s}',${sv.r},${JSON.stringify(sv.enabled||'')})">
+          <span style="font-size:12px">${pct(sv.r)}${enabledMark}</span>${profitStr}
         </td>`;
       }
     });
@@ -644,19 +755,22 @@ function renderTable(data,sites){
       <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
       <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
     </div></td></tr>`;
-    rows+=r;
-  });
+    return r;
+  }).join('');
 
   document.getElementById('mainContent').innerHTML=`
-    <div class="tbl-wrap">
-      <div class="tbl-scroll"><table><thead>${head}</thead><tbody>${rows||`<tr><td colspan="40" style="text-align:center;padding:24px;color:var(--t3);font-size:13px">無符合結果</td></tr>`}</tbody></table></div>
-      <div class="tbl-footer">共 ${data.length} 筆 · 幣別：${curCur} · 點費率格可直接修改 · ＋ 表示尚未設定</div>
+    <div class="tbl-outer">
+      <table><thead>${head}</thead><tbody>${rows||emptyRow()}</tbody></table>
+      <div class="tbl-footer">共 ${data.length} 筆　·　點費率格可直接修改　·　＋ 表示尚未設定</div>
     </div>`;
 }
 
-function renderSite(filteredData){
-  const cards=SITE_INFO.map(si=>{
-    const count=filteredData.filter(d=>d.sites?.[si.id]?.r!==null).length;
+function emptyRow(){return'<tr><td colspan="40" style="text-align:center;padding:24px;color:var(--t3)">無符合結果</td></tr>';}
+
+// ── Site overview ─────────────────────────────────────
+function renderSiteOverview(filteredData){
+  const cards=SITE_INFO.map(function(si){
+    const count=filteredData.filter(function(d){return d.sites&&d.sites[si.id]&&d.sites[si.id].r!==null;}).length;
     return `<div class="sc">
       <div class="sc-head"><div class="sc-name">${esc(si.name)}<span class="sc-id">${si.id}</span></div><div class="sc-backend">${si.backend}</div></div>
       <div class="sc-body">
@@ -676,50 +790,132 @@ function renderSite(filteredData){
   document.getElementById('mainContent').innerHTML=`<div class="site-grid">${cards}</div>`;
 }
 
-// ── Inline rate edit ──────────────────────────────────
-function editRate(id,siteId,curR,curP,curE){
-  const rS=curR!==null?(curR*100).toFixed(1):'';
-  const pS=curP!==null?(curP*100).toFixed(1):'';
-  const rate=prompt(`[${SITE_LABEL[siteId]}] 費率 (%)\n目前：${rS||'未設定'}`,rS);
+// ── Inline site rate edit ─────────────────────────────
+function editSiteRate(id,siteId,curRate,curEnabled){
+  const rStr=curRate!==null&&curRate!==undefined?(curRate*100).toFixed(1):'';
+  const rate=prompt(`[${SITE_LABEL[siteId]}] 費率 (%)\n目前：${rStr||'未設定'}`,rStr);
   if(rate===null)return;
-  const profit=prompt(`[${SITE_LABEL[siteId]}] 利潤 % (可留空)`,pS);
-  if(profit===null)return;
-  const enabled=prompt(`[${SITE_LABEL[siteId]}] 預設啟用？Y / N\n目前：${curE||'未設定'}`,curE||'Y');
+  const enabled=prompt(`[${SITE_LABEL[siteId]}] 預設啟用？Y / N\n目前：${curEnabled||'未設定'}`,curEnabled||'Y');
   if(enabled===null)return;
   const rv=rate===''?null:parseFloat(rate)/100;
-  const pv=profit===''?null:parseFloat(profit)/100;
   const ev=enabled.toUpperCase()==='Y'?'Y':enabled.toUpperCase()==='N'?'N':'';
-  apiPost({action:'updateSiteRate',siteId,providerId:id,rate:rv,profit:pv,enabled:ev})
-    .then(res=>{
+  apiPost({action:'updateSiteRate',siteId:siteId,providerId:id,rate:rv,enabled:ev})
+    .then(function(res){
       if(res.error){toast('錯誤：'+res.error,true);return;}
-      Object.values(DATA_BY_CUR).forEach(arr=>{const d=arr.find(x=>x.id===id);if(d&&d.sites)d.sites[siteId]={r:rv,p:pv,enabled:ev};});
+      // Update local data
+      DATA.forEach(function(d){
+        if(d.id===id&&d.sites){
+          if(!d.sites[siteId])d.sites[siteId]={};
+          // recalculate profit
+          const orig=d.sites[siteId].orig;
+          const profit=(rv!==null&&orig!==null&&orig!=='N/A')?Math.round((rv-orig)*100000)/100000:null;
+          d.sites[siteId].r=rv;
+          d.sites[siteId].p=profit;
+          d.sites[siteId].enabled=ev;
+        }
+      });
       toast('已更新 ✓');render();
-    }).catch(e=>toast('連線錯誤：'+e.message,true));
+    }).catch(function(e){toast('連線錯誤：'+e.message,true);});
 }
 
 // ── Modal ─────────────────────────────────────────────
-function buildSiteBlocks(sites){
-  return SITE_ORDER.map(sid=>{
-    const sd=sites?.[sid]||{r:null,p:null,enabled:'Y'};
+function buildCurBlocks(currenciesData){
+  return CURRENCIES.map(function(cur){
+    const cd=(currenciesData&&currenciesData[cur.code])||{};
+    const isUnsup=cd.orig==='N/A';
+    return `<div class="cur-block">
+      <div class="cb-head">
+        <span class="cb-code">${cur.label}</span>
+        <div class="cb-unsupported">
+          不支持
+          <div class="tog ${isUnsup?'on':''}" id="unsup_${cur.code}" onclick="toggleUnsup('${cur.code}')"><div class="tog-th"></div></div>
+        </div>
+      </div>
+      <div class="cb-body ${isUnsup?'dim':''}" id="cb_body_${cur.code}">
+        <div class="fgp">
+          <label class="fl">原始費率</label>
+          <input class="fi" id="cr_orig_${cur.code}" type="number" step="0.001" value="${cd.orig&&cd.orig!=='N/A'?cd.orig:''}" placeholder="0.05" oninput="autoFillRates('${cur.code}')">
+        </div>
+        <div class="fgp">
+          <label class="fl">方案一 (+4%)</label>
+          <input class="fi" id="cr_p1_${cur.code}" type="number" step="0.001" value="${cd.p1!==null&&cd.p1!==undefined?cd.p1:''}" placeholder="自動">
+        </div>
+        <div class="fgp">
+          <label class="fl">方案二 (+4%)</label>
+          <input class="fi" id="cr_p2_${cur.code}" type="number" step="0.001" value="${cd.p2!==null&&cd.p2!==undefined?cd.p2:''}" placeholder="自動">
+        </div>
+        <div class="fgp">
+          <label class="fl">方案三 (+6%)</label>
+          <input class="fi" id="cr_p3_${cur.code}" type="number" step="0.001" value="${cd.p3!==null&&cd.p3!==undefined?cd.p3:''}" placeholder="自動">
+        </div>
+        <div class="fgp">
+          <label class="fl">官方費率 (+7%)</label>
+          <input class="fi" id="cr_off_${cur.code}" type="number" step="0.001" value="${cd.official!==null&&cd.official!==undefined?cd.official:''}" placeholder="自動">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleUnsup(code){
+  const tog=document.getElementById('unsup_'+code);
+  const body=document.getElementById('cb_body_'+code);
+  const on=tog.classList.toggle('on');
+  body.classList.toggle('dim',on);
+  if(on){
+    ['cr_orig_','cr_p1_','cr_p2_','cr_p3_','cr_off_'].forEach(function(pfx){
+      const el=document.getElementById(pfx+code);
+      if(el){el.value='';el.disabled=true;}
+    });
+  } else {
+    ['cr_orig_','cr_p1_','cr_p2_','cr_p3_','cr_off_'].forEach(function(pfx){
+      const el=document.getElementById(pfx+code);
+      if(el)el.disabled=false;
+    });
+  }
+}
+
+function autoFillRates(code){
+  const origEl=document.getElementById('cr_orig_'+code);
+  const orig=parseFloat(origEl.value);
+  if(isNaN(orig))return;
+  const round5=function(v){return Math.round(v*100000)/100000;};
+  const p1El=document.getElementById('cr_p1_'+code);
+  const p2El=document.getElementById('cr_p2_'+code);
+  const p3El=document.getElementById('cr_p3_'+code);
+  const offEl=document.getElementById('cr_off_'+code);
+  if(p1El&&p1El.value==='')p1El.value=round5(orig+0.04);
+  if(p2El&&p2El.value==='')p2El.value=round5(orig+0.04);
+  if(p3El&&p3El.value==='')p3El.value=round5(orig+0.06);
+  if(offEl&&offEl.value==='')offEl.value=round5(orig+0.07);
+}
+
+function buildSiteBlocks(sitesData){
+  return SITE_ORDER.map(function(sid){
+    const sd=(sitesData&&sitesData[sid])||{r:null,enabled:'Y'};
     const on=sd.enabled!=='N';
     return `<div class="site-block">
       <div class="sb-hd">
         <div class="sb-name">${SITE_NAME[sid]}<span class="sb-id">${sid}</span></div>
         <div class="sb-tog">預設啟用
-          <div class="tog-track ${on?'on':''}" id="tgl_${sid}" onclick="toggleSite('${sid}')"><div class="tog-thumb"></div></div>
+          <div class="tog ${on?'on':''}" id="tgl_${sid}" onclick="toggleSite('${sid}')"><div class="tog-th"></div></div>
           <span id="tgl_lbl_${sid}" style="font-size:11px;font-weight:500;color:${on?'var(--green)':'var(--t3)'}">${on?'Y':'N'}</span>
         </div>
       </div>
-      <div class="sb-body${on?'':' dim'}" id="sb_body_${sid}">
-        <div class="fgp"><label class="fl">站點費率</label><input class="fi" id="sr_${sid}" type="number" step="0.001" value="${sd.r!==null?sd.r:''}" placeholder="e.g. 0.09"></div>
-        <div class="fgp"><label class="fl">利潤 %</label><input class="fi" id="sp_${sid}" type="number" step="0.001" value="${sd.p!==null?sd.p:''}" placeholder="e.g. 0.04"></div>
+      <div class="sb-body ${on?'':'dim'}" id="sb_body_${sid}">
+        <div class="fgp">
+          <label class="fl">站點費率 (your_rate)</label>
+          <input class="fi" id="sr_${sid}" type="number" step="0.001" value="${sd.r!==null&&sd.r!==undefined?sd.r:''}" placeholder="e.g. 0.09">
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
 function toggleSite(sid){
-  const t=document.getElementById('tgl_'+sid),l=document.getElementById('tgl_lbl_'+sid),b=document.getElementById('sb_body_'+sid);
+  const t=document.getElementById('tgl_'+sid);
+  const l=document.getElementById('tgl_lbl_'+sid);
+  const b=document.getElementById('sb_body_'+sid);
   const on=t.classList.toggle('on');
   l.textContent=on?'Y':'N';l.style.color=on?'var(--green)':'var(--t3)';
   b.classList.toggle('dim',!on);
@@ -729,18 +925,18 @@ function openAdd(){
   editingId=null;
   document.getElementById('moTitle').textContent='新增供應商';
   document.getElementById('moSaveBtn').textContent='新增';
-  ['f_en','f_cn','f_note','f_prov','f_ext','f_cat_icon','f_bal_icon','f_p1','f_p2','f_p3','f_official'].forEach(i=>document.getElementById(i).value='');
+  ['f_en','f_cn','f_note','f_prov','f_ext','f_cat_icon','f_bal_icon'].forEach(function(i){document.getElementById(i).value='';});
   document.getElementById('f_cat').value='slots';
   document.getElementById('f_source').value='ZF one api';
   document.getElementById('f_ctrl').value='N';
   document.getElementById('f_enabled').value='N';
+  document.getElementById('curBlocks').innerHTML=buildCurBlocks(null);
   document.getElementById('siteBlocks').innerHTML=buildSiteBlocks(null);
   document.getElementById('overlay').style.display='flex';
 }
 
 function openEdit(id){
-  const data=DATA_BY_CUR[curCur]||[];
-  const d=data.find(x=>x.id===id);if(!d)return;
+  const d=DATA.find(function(x){return x.id===id;});if(!d)return;
   editingId=id;
   document.getElementById('moTitle').textContent='編輯 — '+d.en;
   document.getElementById('moSaveBtn').textContent='儲存所有變更';
@@ -755,111 +951,73 @@ function openEdit(id){
   document.getElementById('f_ext').value=d.ext_cat||'';
   document.getElementById('f_cat_icon').value=d.cat_icon||'';
   document.getElementById('f_bal_icon').value=d.bal_icon||'';
-  document.getElementById('f_p1').value=d.p1??'';
-  document.getElementById('f_p2').value=d.p2??'';
-  document.getElementById('f_p3').value=d.p3??'';
-  document.getElementById('f_official').value=d.official??'';
-  document.getElementById('siteBlocks').innerHTML=buildSiteBlocks(d.sites);
+  document.getElementById('curBlocks').innerHTML=buildCurBlocks(d.currencies||{});
+  document.getElementById('siteBlocks').innerHTML=buildSiteBlocks(d.sites||{});
   document.getElementById('overlay').style.display='flex';
 }
 
 function closeMo(){document.getElementById('overlay').style.display='none';}
 
 async function saveMo(){
-  const sites={};
-  SITE_ORDER.forEach(s=>{
-    const r=document.getElementById('sr_'+s)?.value;
-    const p=document.getElementById('sp_'+s)?.value;
-    const on=document.getElementById('tgl_'+s)?.classList.contains('on');
-    sites[s]={r:r?parseFloat(r):null,p:p?parseFloat(p):null,enabled:on?'Y':'N'};
+  const currencies={};
+  CURRENCIES.forEach(function(cur){
+    const unsup=document.getElementById('unsup_'+cur.code)&&document.getElementById('unsup_'+cur.code).classList.contains('on');
+    if(unsup){currencies[cur.code]={orig:'N/A',p1:null,p2:null,p3:null,official:null};return;}
+    function fv(id){const el=document.getElementById(id);return el&&el.value!==''?parseFloat(el.value):null;}
+    currencies[cur.code]={
+      orig:     fv('cr_orig_'+cur.code),
+      p1:       fv('cr_p1_'+cur.code),
+      p2:       fv('cr_p2_'+cur.code),
+      p3:       fv('cr_p3_'+cur.code),
+      official: fv('cr_off_'+cur.code),
+    };
   });
-  const payload={en:document.getElementById('f_en').value.trim(),cn:document.getElementById('f_cn').value.trim(),cat:document.getElementById('f_cat').value,source:document.getElementById('f_source').value,ctrl:document.getElementById('f_ctrl').value,enabled:document.getElementById('f_enabled').value,note:document.getElementById('f_note').value.trim(),prov_code:document.getElementById('f_prov').value.trim(),ext_cat:document.getElementById('f_ext').value.trim(),cat_icon:document.getElementById('f_cat_icon').value.trim(),bal_icon:document.getElementById('f_bal_icon').value.trim(),p1:parseFloat(document.getElementById('f_p1').value)||null,p2:parseFloat(document.getElementById('f_p2').value)||null,p3:parseFloat(document.getElementById('f_p3').value)||null,official:parseFloat(document.getElementById('f_official').value)||null,sites};
+  const sites={};
+  SITE_ORDER.forEach(function(sid){
+    const rEl=document.getElementById('sr_'+sid);
+    const on=document.getElementById('tgl_'+sid)&&document.getElementById('tgl_'+sid).classList.contains('on');
+    sites[sid]={r:rEl&&rEl.value!==''?parseFloat(rEl.value):null,enabled:on?'Y':'N'};
+  });
+  const payload={
+    en:document.getElementById('f_en').value.trim(),
+    cn:document.getElementById('f_cn').value.trim(),
+    cat:document.getElementById('f_cat').value,
+    source:document.getElementById('f_source').value,
+    ctrl:document.getElementById('f_ctrl').value,
+    enabled:document.getElementById('f_enabled').value,
+    note:document.getElementById('f_note').value.trim(),
+    prov_code:document.getElementById('f_prov').value.trim(),
+    ext_cat:document.getElementById('f_ext').value.trim(),
+    cat_icon:document.getElementById('f_cat_icon').value.trim(),
+    bal_icon:document.getElementById('f_bal_icon').value.trim(),
+    currencies:currencies,
+    sites:sites,
+  };
   const btn=document.getElementById('moSaveBtn');
   btn.textContent='儲存中…';btn.disabled=true;
   try{
-    const res=await apiPost(editingId!==null?{action:'updateProvider',data:{id:editingId,...payload}}:{action:'addProvider',data:payload});
+    const res=await apiPost(editingId!==null?{action:'updateProvider',data:Object.assign({id:editingId},payload)}:{action:'addProvider',data:payload});
     if(res.error){toast('錯誤：'+res.error,true);return;}
-    closeMo();toast(editingId!==null?'已儲存 ✓':'已新增 ✓');await loadAll();
+    closeMo();toast(editingId!==null?'已儲存 ✓':'已新增 ✓');
+    await loadAll();
   }catch(e){toast('連線錯誤：'+e.message,true);}
   finally{btn.textContent=editingId!==null?'儲存所有變更':'新增';btn.disabled=false;}
 }
 
 async function delRow(id,name){
-  if(!confirm(`確定刪除「${name}」？`))return;
-  try{const res=await apiPost({action:'deleteProvider',id});if(res.error){toast('錯誤：'+res.error,true);return;}toast('已刪除 ✓');await loadAll();}catch(e){toast('連線錯誤：'+e.message,true);}
+  if(!confirm('確定刪除「'+name+'」？'))return;
+  try{
+    const res=await apiPost({action:'deleteProvider',id:id});
+    if(res.error){toast('錯誤：'+res.error,true);return;}
+    toast('已刪除 ✓');await loadAll();
+  }catch(e){toast('連線錯誤：'+e.message,true);}
 }
 
-function toast(msg,isErr=false){
+function toast(msg,isErr){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast show'+(isErr?' err':'');
-  setTimeout(()=>t.className='toast',3000);
+  setTimeout(function(){t.className='toast';},3000);
 }
-
-function switchView(v){
-  view=v;
-  document.getElementById('btnT').className='tab'+(v==='table'?' on':'');
-  document.getElementById('btnS').className='tab'+(v==='site'?' on':'');
-  render();
-}
-
-
-// ── Auth ──────────────────────────────────────────────
-const CLIENT_ID = '1031858151521-k4a6p25nd81oiuio7id9d9p5odacgqdr.apps.googleusercontent.com';
-const ALLOWED_DOMAIN = 'wingea.vip';
-let currentUser = null;
-
-function initAuth(){
-  google.accounts.id.initialize({
-    client_id: CLIENT_ID,
-    callback: handleCredential,
-    auto_select: true,
-  });
-  google.accounts.id.renderButton(
-    document.getElementById('g_id_signin'),
-    {theme:'outline', size:'large', text:'signin_with', locale:'zh-TW', width:280}
-  );
-  google.accounts.id.prompt();
-}
-
-function handleCredential(response){
-  // Google JWT 用 base64url，需先轉成標準 base64
-  const base64url = response.credential.split('.')[1];
-  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-  const payload = JSON.parse(atob(base64));
-  const email   = payload.email || '';
-  const domain  = email.split('@')[1] || '';
-  if(domain !== ALLOWED_DOMAIN){
-    const err = document.getElementById('loginErr');
-    err.textContent = `帳號 ${email} 沒有存取權限，請用 @wingea.vip 帳號登入。`;
-    err.style.display = 'block';
-    return;
-  }
-  currentUser = { email, name: payload.name, picture: payload.picture };
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('userInfo').innerHTML =
-    `<img src="${payload.picture}" style="width:28px;height:28px;border-radius:50%;margin-right:6px;vertical-align:middle">` +
-    `<span style="font-size:12px;color:var(--t2)">${payload.name}</span>` +
-    `<button onclick="signOut()" style="margin-left:10px;height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer">登出</button>`;
-  loadAll();
-}
-
-function signOut(){
-  google.accounts.id.disableAutoSelect();
-  currentUser = null;
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('userInfo').innerHTML = '';
-  document.getElementById('mainContent').innerHTML = '<div class="state"><div class="spin"></div>請先登入</div>';
-}
-
-// 等 GSI script 載入完成後初始化，用 polling 確保不漏掉
-function waitForGoogle(){
-  if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
-    initAuth();
-  } else {
-    setTimeout(waitForGoogle, 100);
-  }
-}
-waitForGoogle();
 </script>
 </body>
 </html>
