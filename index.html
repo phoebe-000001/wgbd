@@ -297,7 +297,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
     <div class="flbl">顯示欄位</div>
     <div class="fcontent">
       <label class="ck"><input type="checkbox" id="ck_src" checked onchange="render()"> 遊戲來源</label>
-      <label class="ck"><input type="checkbox" id="ck_prov" checked onchange="render()"> provider_code</label>
+      <label class="ck"><input type="checkbox" id="ck_prov" onchange="render()"> provider_code</label>
       <label class="ck"><input type="checkbox" id="ck_ctrl" checked onchange="render()"> 可控</label>
       <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 全域啟用</label>
       <label class="ck"><input type="checkbox" id="ck_cat_icon" onchange="render()"> category_icon</label>
@@ -388,9 +388,10 @@ const TOKEN_PIC_KEY  = 'wg_auth_pic';
 const TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 // ══════════════════════════════════════════════════════
 
-const SITE_ORDER = ['CNY001','CNY002','CNY003','CNY004','CNY005','VND001','USDT001','INR001'];
-const SITE_LABEL = {CNY001:'新博 CNY001',CNY002:'庫里南 CNY002',CNY003:'688娛樂 CNY003',CNY004:'Lebo-CNY CNY004',CNY005:'X11Club CNY005',VND001:'Lucky7 VND001',USDT001:'Lebo-USDT USDT001',INR001:'星辰XC INR001'};
-const SITE_NAME  = {CNY001:'新博國際',CNY002:'庫里南',CNY003:'688娛樂',CNY004:'Lebo-CNY',CNY005:'X11Club',VND001:'Lucky7',USDT001:'Lebo-USDT',INR001:'星辰XC'};
+// 站點動態讀取，loadAll 後填入
+let SITE_ORDER = [];
+let SITE_LABEL = {};
+let SITE_NAME  = {};
 const CAT_OPTS = [
   {v:'slots',l:'Slots 電子',dot:'#1d4ed8'},{v:'live',l:'Live 視訊',dot:'#065f46'},
   {v:'sports',l:'Sports 體育',dot:'#92400e'},{v:'lottery',l:'Lottery 彩票',dot:'#5b21b6'},
@@ -399,10 +400,9 @@ const CAT_OPTS = [
   {v:'cockfight',l:'Cockfight',dot:'#991b1b'},
 ];
 const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(function(v){return{v:v,l:v};});
-const SITE_OPTS = SITE_ORDER.map(function(v){return{v:v,l:SITE_LABEL[v]};});
 const CAT_CLS = {slots:'b-slots',live:'b-live',sports:'b-sports',lottery:'b-lottery',fish:'b-fish',poker:'b-poker','mini game':'b-mini','e-sports':'b-esports',cockfight:'b-cock'};
 const CAT_LBL = {slots:'Slots',live:'Live',sports:'Sports',lottery:'彩票',fish:'Fish',poker:'棋牌','mini game':'Mini','e-sports':'E-Sports',cockfight:'鬥雞'};
-const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:SITE_OPTS}};
+const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:[]}};
 
 let DATA=[], SITE_INFO=[], CURRENCIES=[];
 let viewMode='currency'; // 'currency' | 'site_rate' | 'site_overview'
@@ -452,8 +452,7 @@ function handleCredential(response){
 function showUser(name, pic){
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('userInfo').innerHTML=
-    (pic?`<img src="${pic}" class="user-avatar">`:'') +
-    `<span class="user-info" style="font-size:12px;color:var(--t2)">${esc(name)}</span>`+
+    (pic?`<img src="${pic}" class="user-avatar" title="${esc(name)}">`:'<div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff">'+esc(name.charAt(0))+'</div>') +
     `<button class="btn-signout" onclick="signOut()">登出</button>`;
 }
 
@@ -488,6 +487,14 @@ async function loadAll(){
     DATA=pRes.providers||[];
     SITE_INFO=sRes.sites||[];
     CURRENCIES=cRes.currencies||[];
+    // 從站點資料動態建立 SITE_ORDER / SITE_LABEL / SITE_NAME / DD_CFG.site.opts
+    SITE_ORDER=SITE_INFO.map(function(s){return s.id;});
+    SITE_LABEL={};SITE_NAME={};
+    SITE_INFO.forEach(function(s){
+      SITE_LABEL[s.id]=s.name+' '+s.id;
+      SITE_NAME[s.id]=s.name;
+    });
+    DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
     // Set default active currency
     if(CURRENCIES.length&&!activeCur) activeCur=CURRENCIES[0].code;
     buildCurBar();
