@@ -1,1053 +1,490 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>贏界 Wingea · 遊戲抽點表</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async></script>
-<style>
-:root{
-  --bg:#f7f6f3;--sur:#fff;--sur2:#f0efe9;--bdr:#e2e0d8;--bdr2:#ccc9bc;
-  --t:#1a1917;--t2:#6b6860;--t3:#9e9b93;
-  --accent:#2a5cff;--abg:#eef2ff;--ahov:#1a4ce0;
-  --green:#1a7a4a;--red:#b91c1c;--redbg:#fee2e2;--yellow:#92400e;
-  --mono:'DM Mono',monospace;--sans:'Noto Sans TC',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--t);min-height:100vh;}
+// ══════════════════════════════════════════════════════════
+//  Wingea Dashboard · Apps Script Backend  (v4)
+//  站點、幣別全部從 Sheets 動態讀取
+// ══════════════════════════════════════════════════════════
 
-/* Login */
-.login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
-.login-card{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:40px 48px;text-align:center;max-width:380px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);}
-.login-logo{width:48px;height:48px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
-.login-logo-dot{width:22px;height:22px;background:#fff;border-radius:50%;}
-.login-title{font-size:18px;font-weight:600;margin-bottom:6px;}
-.login-sub{font-size:13px;color:var(--t2);margin-bottom:28px;}
-.login-err{font-size:12px;color:var(--red);margin-top:14px;padding:8px 12px;background:var(--redbg);border-radius:8px;display:none;}
+const MAIN_SHEET            = 'CNY';
+const SITE_OVERVIEW_SHEET   = '站點統整';
+const CURRENCY_CONFIG_SHEET = '幣別設定';
 
-/* Header */
-.hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:300;}
-.logo{font-size:14px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
-.logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;}
-.hdr-right{display:flex;align-items:center;gap:12px;}
-.sync{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:6px;}
-.sync-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.user-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);}
-.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;margin:2px;}
-.btn-signout{height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
-.hdr-right{display:flex;align-items:center;gap:8px;}
-#userInfo{display:flex;align-items:center;gap:6px;}
-
-/* Layout */
-.page{max-width:1700px;margin:0 auto;padding:16px 24px;}
-
-/* Filter bar */
-.filter-bar{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;margin-bottom:12px;overflow:visible;}
-.frow{display:flex;align-items:center;min-height:42px;border-bottom:1px solid var(--bdr);}
-.frow:last-child{border-bottom:none;}
-.flbl{width:84px;flex-shrink:0;padding:0 14px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;border-right:1px solid var(--bdr);align-self:stretch;display:flex;align-items:center;}
-.fcontent{flex:1;padding:5px 12px;display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
-
-/* Search */
-.srch{position:relative;flex:1;min-width:200px;max-width:400px;}
-.sicon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none;}
-input[type=text]{width:100%;height:30px;padding:0 10px 0 30px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;}
-input[type=text]:focus{border-color:var(--accent);background:#fff;}
-
-/* Dropdown */
-.dd{position:relative;flex-shrink:0;}
-.dd-btn{height:30px;padding:0 26px 0 10px;border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);font-size:12px;font-family:var(--sans);cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;position:relative;user-select:none;}
-.dd-btn::after{content:"▾";position:absolute;right:8px;font-size:9px;color:var(--t3);}
-.dd-btn.open{border-color:var(--accent);background:var(--sur);}
-.dd-btn.has{border-color:var(--accent);}
-.dd-badge{background:var(--accent);color:#fff;border-radius:10px;font-size:10px;font-weight:500;padding:1px 6px;}
-.dd-menu{position:absolute;top:calc(100% + 4px);left:0;min-width:210px;background:var(--sur);border:1px solid var(--bdr2);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:400;overflow:hidden;}
-.dd-srch{padding:7px 8px 5px;border-bottom:1px solid var(--bdr);}
-.dd-srch input{width:100%;height:26px;padding:0 8px;font-size:12px;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t);outline:none;}
-.dd-list{max-height:200px;overflow-y:auto;}
-.dd-item{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12px;cursor:pointer;}
-.dd-item:hover{background:var(--sur2);}
-.dd-cb{width:13px;height:13px;border:1px solid var(--bdr2);border-radius:3px;background:var(--sur);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;}
-.dd-item.on .dd-cb{background:var(--accent);border-color:var(--accent);}
-.dd-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.dd-foot{padding:5px 8px;border-top:1px solid var(--bdr);display:flex;gap:5px;}
-.dd-clr{flex:1;height:22px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;font-family:var(--sans);}
-.dd-all{flex:1;height:22px;font-size:11px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-family:var(--sans);}
-.dd-empty{padding:12px;text-align:center;font-size:12px;color:var(--t3);}
-
-/* Selected strip */
-.sel-strip{display:flex;gap:5px;flex-wrap:wrap;align-items:center;padding:5px 12px 6px;border-bottom:1px solid var(--bdr);}
-.sel-tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:4px;font-size:11px;background:var(--sur2);border:1px solid var(--bdr);color:var(--t2);}
-.sel-tag .rm{cursor:pointer;color:var(--t3);}
-.sel-tag .rm:hover{color:var(--t);}
-
-/* Col toggles */
-.ck{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none;}
-.ck input{cursor:pointer;accent-color:var(--accent);}
-.ck:has(input:checked){color:var(--t);}
-.factions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-shrink:0;}
-
-/* Buttons */
-.btn{height:30px;padding:0 12px;font-size:12px;font-family:var(--sans);font-weight:500;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
-.btn-pri{background:var(--accent);color:#fff;} .btn-pri:hover{background:var(--ahov);}
-.btn-gho{background:transparent;color:var(--t2);border:1px solid var(--bdr);} .btn-gho:hover{background:var(--sur2);}
-.btn-dan{background:var(--redbg);color:var(--red);border:1px solid #fca5a5;}
-.btn-sm{height:24px;padding:0 8px;font-size:11px;border-radius:6px;}
-.tabs{display:flex;gap:2px;background:var(--sur2);border-radius:8px;padding:3px;}
-.tab{height:24px;padding:0 11px;font-size:12px;font-family:var(--sans);font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
-.tab.on{background:var(--sur);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.08);}
-
-/* View mode tabs */
-.view-mode-tabs{display:flex;gap:2px;background:var(--sur2);border-radius:8px;padding:3px;}
-.vm-tab{height:24px;padding:0 12px;font-size:12px;font-family:var(--sans);font-weight:500;border:none;border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
-.vm-tab.on{background:var(--sur);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.08);}
-
-/* Currency tabs */
-.cur-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.cur-tab{height:28px;padding:0 12px;font-size:11px;font-family:var(--mono);font-weight:500;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:6px;}
-.cur-tab:hover{border-color:var(--bdr2);color:var(--t);}
-.cur-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-.cur-tab.pinned{background:var(--abg);color:var(--accent);border-color:var(--accent);}
-.cur-pin-btn{font-size:10px;opacity:.7;cursor:pointer;}
-.cur-pin-btn:hover{opacity:1;}
-.compare-hint{font-size:11px;color:var(--t3);margin-left:4px;}
-
-/* State */
-.state{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;padding:60px;text-align:center;color:var(--t2);}
-.spin{width:26px;height:26px;border:2px solid var(--bdr);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Table wrapper with sticky */
-.tbl-outer{overflow:auto;border:1px solid var(--bdr);border-radius:12px;background:var(--sur);max-height:calc(100vh - 320px);}
-table{width:100%;border-collapse:collapse;font-size:12px;}
-thead th{background:var(--sur2);color:var(--t2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--bdr);white-space:nowrap;cursor:pointer;user-select:none;
-  position:sticky;top:0;z-index:10;}
-thead th:hover{color:var(--t);}
-thead th.sorted{color:var(--t);}
-thead th.r{text-align:right;}
-thead th.orig-h,td.orig-h{text-align:right;color:var(--t3);font-weight:400;}
-/* Sticky first column */
-th.sticky-col,td.sticky-col{position:sticky;left:0;z-index:5;background:var(--sur);}
-thead th.sticky-col{z-index:15;background:var(--sur2);}
-tbody tr:hover td.sticky-col{background:var(--sur2);}
-.sarr{font-size:9px;margin-left:2px;opacity:.4;}
-thead th.sorted .sarr{opacity:1;}
-/* Cur group header */
-thead tr.cur-hdr th{background:#f0f3ff;font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;padding:4px 10px;border-bottom:none;}
-tbody tr{border-bottom:1px solid var(--bdr);}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:var(--sur2);}
-td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
-.td-en{font-size:12px;}
-.td-cn{font-size:10px;color:var(--t2);margin-top:1px;}
-.td-note{font-size:10px;color:var(--t3);margin-top:1px;}
-.td-rc{text-align:right;}
-.td-ctr{text-align:center;}
-.mono{font-family:var(--mono);font-size:10px;color:var(--t2);}
-.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;}
-.b-slots{background:#dbeafe;color:#1d4ed8;} .b-live{background:#d1fae5;color:#065f46;}
-.b-sports{background:#fef3c7;color:#92400e;} .b-lottery{background:#ede9fe;color:#5b21b6;}
-.b-fish{background:#dcfce7;color:#166534;} .b-poker{background:#fce7f3;color:#9d174d;}
-.b-mini{background:#ffedd5;color:#9a3412;} .b-esports{background:#e0f2fe;color:#0c4a6e;}
-.b-cock{background:#fee2e2;color:#991b1b;}
-.src-tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;background:var(--sur2);border:1px solid var(--bdr);color:var(--t2);font-family:var(--mono);}
-.rc-click{text-align:right;cursor:pointer;} .rc-click:hover{background:var(--abg);}
-.null-cell{text-align:center;color:var(--t3);cursor:pointer;font-size:14px;} .null-cell:hover{color:var(--accent);}
-.profit{font-size:10px;color:var(--green);margin-top:1px;}
-.na-val{color:var(--t3);font-size:11px;}
-.cy{color:var(--green);} .cn2{color:var(--t3);}
-.abtns{display:flex;gap:4px;justify-content:center;}
-.tbl-footer{padding:8px 14px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);}
-
-/* Site cards */
-.site-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
-.sc{background:var(--sur);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;}
-.sc-head{padding:12px 16px 10px;background:var(--sur2);border-bottom:1px solid var(--bdr);}
-.sc-name{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:7px;}
-.sc-id{font-size:10px;font-family:var(--mono);color:var(--t2);font-weight:400;}
-.sc-backend{font-size:10px;font-family:var(--mono);color:var(--t3);margin-top:2px;}
-.sc-body{padding:12px 16px;}
-.sc-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
-.sc-row:last-child{border-bottom:none;}
-.sc-lbl{color:var(--t2);} .sc-val{font-weight:500;} .sc-val.warn{color:var(--yellow);}
-.sc-count{margin-top:8px;padding:6px 12px;background:var(--abg);border-radius:8px;font-size:11px;color:var(--accent);font-weight:500;text-align:center;}
-
-/* Modal */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(2px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--sur);border-radius:16px;width:100%;max-width:680px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.22);}
-.mo-hd{padding:16px 20px 12px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--sur);z-index:10;}
-.mo-title{font-size:15px;font-weight:600;}
-.mo-x{background:none;border:none;font-size:20px;color:var(--t2);cursor:pointer;padding:2px 6px;border-radius:6px;}
-.mo-x:hover{background:var(--sur2);}
-.mo-body{padding:18px 20px;}
-.mo-foot{padding:12px 20px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--sur);}
-.mo-sec{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding-bottom:8px;border-bottom:1px solid var(--bdr);margin:16px 0 12px;}
-.mo-sec:first-child{margin-top:0;}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.fgp{display:flex;flex-direction:column;gap:4px;}
-.fgp.full{grid-column:1/-1;}
-.fl{font-size:10px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;}
-.fi{height:32px;padding:0 9px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;width:100%;}
-.fi:focus{border-color:var(--accent);background:#fff;}
-.fi:disabled{opacity:.5;cursor:not-allowed;}
-.fsel{height:32px;padding:0 9px;font-size:12px;font-family:var(--sans);border:1px solid var(--bdr);border-radius:8px;background:var(--sur2);color:var(--t);outline:none;cursor:pointer;width:100%;}
-.fsel:focus{border-color:var(--accent);}
-
-/* Currency rate blocks in modal */
-.cur-block{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:8px;}
-.cur-block:last-child{margin-bottom:0;}
-.cb-head{padding:8px 12px;background:var(--sur2);display:flex;align-items:center;justify-content:space-between;}
-.cb-code{font-size:12px;font-weight:600;font-family:var(--mono);}
-.cb-unsupported{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
-.cb-body{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;}
-.cb-body.dim{opacity:.3;pointer-events:none;}
-
-/* Site blocks in modal */
-.site-block{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:8px;}
-.site-block:last-child{margin-bottom:0;}
-.sb-hd{padding:8px 12px;background:var(--sur2);display:flex;align-items:center;justify-content:space-between;}
-.sb-name{font-size:12px;font-weight:500;display:flex;align-items:center;gap:5px;}
-.sb-id{font-size:10px;font-family:var(--mono);color:var(--t2);font-weight:400;}
-.sb-tog{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
-.tog{width:28px;height:15px;border-radius:8px;background:var(--bdr2);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;}
-.tog.on{background:var(--accent);}
-.tog-th{width:11px;height:11px;border-radius:6px;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;}
-.tog.on .tog-th{left:15px;}
-.sb-body{padding:10px 12px;display:grid;grid-template-columns:1fr;gap:8px;}
-.sb-body.dim{opacity:.3;pointer-events:none;}
-.sb-rate-info{font-size:11px;color:var(--t3);margin-top:4px;}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--t);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
-.toast.show{opacity:1;transform:translateY(0);}
-.toast.err{background:var(--red);}
-</style>
-</head>
-<body>
-
-<!-- Login -->
-<div class="login-screen" id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo"><div class="login-logo-dot"></div></div>
-    <div class="login-title">贏界 Wingea</div>
-    <div class="login-sub">請用 wingea.vip 帳號登入</div>
-    <div id="g_id_signin"></div>
-    <div class="login-err" id="loginErr"></div>
-  </div>
-</div>
-
-<header class="hdr">
-  <div class="logo"><div class="logo-dot"></div>贏界 Wingea · 遊戲抽點表</div>
-  <div class="view-mode-tabs" style="margin-left:24px;">
-    <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
-    <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
-    <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
-  </div>
-  <div class="hdr-right">
-    <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
-    <div id="userInfo"></div>
-  </div>
-</header>
-
-<div class="page">
-<div class="filter-bar">
-  <div class="frow">
-    <div class="flbl">搜尋</div>
-    <div class="fcontent">
-      <div class="srch"><span class="sicon">⌕</span><input type="text" id="q" placeholder="供應商名稱、provider_code、遊戲來源…" oninput="render()"></div>
-    </div>
-  </div>
-  <div class="frow">
-    <div class="flbl">類別</div>
-    <div class="fcontent">
-      <div class="dd" id="dd_cat">
-        <div class="dd-btn" id="dd_cat_btn" onclick="toggleDD('cat')">類別 <span class="dd-badge" id="dd_cat_badge" style="display:none"></span></div>
-        <div class="dd-menu" id="dd_cat_menu" style="display:none">
-          <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('cat',this.value)" onclick="event.stopPropagation()"></div>
-          <div class="dd-list" id="dd_cat_list"></div>
-          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('cat');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('cat');event.stopPropagation()">全選</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="frow">
-    <div class="flbl">遊戲來源</div>
-    <div class="fcontent">
-      <div class="dd" id="dd_src">
-        <div class="dd-btn" id="dd_src_btn" onclick="toggleDD('src')">遊戲來源 <span class="dd-badge" id="dd_src_badge" style="display:none"></span></div>
-        <div class="dd-menu" id="dd_src_menu" style="display:none">
-          <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('src',this.value)" onclick="event.stopPropagation()"></div>
-          <div class="dd-list" id="dd_src_list"></div>
-          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('src');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('src');event.stopPropagation()">全選</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="frow">
-    <div class="flbl">站點</div>
-    <div class="fcontent">
-      <div class="dd" id="dd_site">
-        <div class="dd-btn" id="dd_site_btn" onclick="toggleDD('site')">站點 <span class="dd-badge" id="dd_site_badge" style="display:none"></span></div>
-        <div class="dd-menu" id="dd_site_menu" style="display:none">
-          <div class="dd-srch"><input type="text" placeholder="搜尋…" oninput="renderDDList('site',this.value)" onclick="event.stopPropagation()"></div>
-          <div class="dd-list" id="dd_site_list"></div>
-          <div class="dd-foot"><button class="dd-clr" onclick="clearDD('site');event.stopPropagation()">清除</button><button class="dd-all" onclick="allDD('site');event.stopPropagation()">全選</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div id="selStripRow" style="display:none" class="sel-strip"></div>
-  <div class="frow">
-    <div class="flbl">顯示欄位</div>
-    <div class="fcontent">
-      <label class="ck"><input type="checkbox" id="ck_src" checked onchange="render()"> 遊戲來源</label>
-      <label class="ck"><input type="checkbox" id="ck_prov" onchange="render()"> provider_code</label>
-      <label class="ck"><input type="checkbox" id="ck_ctrl" onchange="render()"> 可控</label>
-      <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 預設啟用</label>
-      <label class="ck"><input type="checkbox" id="ck_cat_icon" onchange="render()"> category_icon</label>
-      <label class="ck"><input type="checkbox" id="ck_bal_icon" onchange="render()"> balance_icon</label>
-      <label class="ck"><input type="checkbox" id="ck_ext" onchange="render()"> external_category_code</label>
-      <div class="factions">
-        <button class="btn btn-gho" onclick="clearAll()">清除篩選</button>
-        <button class="btn btn-pri" onclick="openAdd()">＋ 新增供應商</button>
-      </div>
-    </div>
-  </div>
-  <!-- Currency tabs (only shown in currency mode) -->
-  <div class="frow" id="curTabRow">
-    <div class="flbl">幣別</div>
-    <div class="fcontent">
-      <div class="cur-bar" id="curBar"></div>
-      <span class="compare-hint" id="compareHint"></span>
-    </div>
-  </div>
-</div>
-
-<div id="mainContent"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
-</div>
-
-<!-- Modal -->
-<div class="overlay" id="overlay" style="display:none">
-<div class="modal">
-  <div class="mo-hd"><span class="mo-title" id="moTitle">新增供應商</span><button class="mo-x" onclick="closeMo()">✕</button></div>
-  <div class="mo-body">
-    <div class="mo-sec">基本資料</div>
-    <div class="fg">
-      <div class="fgp"><label class="fl">英文名稱</label><input class="fi" id="f_en" type="text"></div>
-      <div class="fgp"><label class="fl">中文名稱</label><input class="fi" id="f_cn" type="text"></div>
-      <div class="fgp"><label class="fl">類別</label>
-        <select class="fsel" id="f_cat">
-          <option value="slots">Slots 電子</option><option value="live">Live 視訊</option>
-          <option value="sports">Sports 體育</option><option value="lottery">Lottery 彩票</option>
-          <option value="fish">Fish 捕魚</option><option value="poker">Poker 棋牌</option>
-          <option value="mini game">Mini Game</option><option value="e-sports">E-Sports</option>
-          <option value="cockfight">Cockfight</option>
-        </select>
-      </div>
-      <div class="fgp"><label class="fl">遊戲來源</label>
-        <select class="fsel" id="f_source">
-          <option>自研</option><option>ZF one api</option><option>ZF單接</option>
-          <option>OMG集成</option><option>HG集成</option><option>IM集成</option>
-          <option>單接</option><option>JVD FA api</option>
-        </select>
-      </div>
-      <div class="fgp"><label class="fl">可控</label><select class="fsel" id="f_ctrl"><option value="Y">Y</option><option value="N">N</option></select></div>
-      <div class="fgp"><label class="fl">全域預設啟用</label><select class="fsel" id="f_enabled"><option value="Y">Y</option><option value="N">N</option></select></div>
-      <div class="fgp full"><label class="fl">備註</label><input class="fi" id="f_note" type="text" placeholder="選填"></div>
-    </div>
-    <div class="mo-sec">技術欄位</div>
-    <div class="fg">
-      <div class="fgp full"><label class="fl">provider_code</label><input class="fi" id="f_prov" type="text"></div>
-      <div class="fgp"><label class="fl">external_category_code</label><input class="fi" id="f_ext" type="text"></div>
-      <div class="fgp"><label class="fl">category_icon</label><input class="fi" id="f_cat_icon" type="text"></div>
-      <div class="fgp full"><label class="fl">balance_icon</label><input class="fi" id="f_bal_icon" type="text"></div>
-    </div>
-    <div class="mo-sec">各幣別費率設定</div>
-    <div id="curBlocks"></div>
-    <div class="mo-sec">各站點費率與啟用設定</div>
-    <div id="siteBlocks"></div>
-  </div>
-  <div class="mo-foot">
-    <button class="btn btn-gho" onclick="closeMo()">取消</button>
-    <button class="btn btn-pri" id="moSaveBtn" onclick="saveMo()">儲存</button>
-  </div>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ══════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/a/macros/wingea.vip/s/AKfycbykkmL9TfhqxhFb7WZWPkrZjwqiTPrIQq_RyuhoBg6Q9sIUABW4JrcKsw6t2a-vc32f7g/exec';
-const ALLOWED_DOMAIN = 'wingea.vip';
-const TOKEN_KEY = 'wg_auth_token';
-const TOKEN_EXP_KEY = 'wg_auth_exp';
-const TOKEN_NAME_KEY = 'wg_auth_name';
-const TOKEN_PIC_KEY  = 'wg_auth_pic';
-const TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
-// ══════════════════════════════════════════════════════
-
-// 站點動態讀取，loadAll 後填入
-let SITE_ORDER = [];
-let SITE_LABEL = {};
-let SITE_NAME  = {};
-const CAT_OPTS = [
-  {v:'slots',l:'Slots 電子',dot:'#1d4ed8'},{v:'live',l:'Live 視訊',dot:'#065f46'},
-  {v:'sports',l:'Sports 體育',dot:'#92400e'},{v:'lottery',l:'Lottery 彩票',dot:'#5b21b6'},
-  {v:'fish',l:'Fish 捕魚',dot:'#166534'},{v:'poker',l:'Poker 棋牌',dot:'#9d174d'},
-  {v:'mini game',l:'Mini Game',dot:'#9a3412'},{v:'e-sports',l:'E-Sports',dot:'#0c4a6e'},
-  {v:'cockfight',l:'Cockfight',dot:'#991b1b'},
-];
-const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(function(v){return{v:v,l:v};});
-const CAT_CLS = {slots:'b-slots',live:'b-live',sports:'b-sports',lottery:'b-lottery',fish:'b-fish',poker:'b-poker','mini game':'b-mini','e-sports':'b-esports',cockfight:'b-cock'};
-const CAT_LBL = {slots:'Slots',live:'Live',sports:'Sports',lottery:'彩票',fish:'Fish',poker:'棋牌','mini game':'Mini','e-sports':'E-Sports',cockfight:'鬥雞'};
-const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:[]}};
-
-let DATA=[], SITE_INFO=[], CURRENCIES=[];
-let viewMode='currency'; // 'currency' | 'site_rate' | 'site_overview'
-let activeCur=''; // active single currency tab
-let pinnedCurs=new Set(); // pinned currencies for comparison
-let sortK=null, sortD=1, editingId=null;
-const ddSel={cat:new Set(),src:new Set(),site:new Set()};
-const ddOpen={cat:false,src:false,site:false};
-
-// ── Auth ──────────────────────────────────────────────
-function initAuth(){
-  // Check stored token
-  const exp = parseInt(localStorage.getItem(TOKEN_EXP_KEY)||'0');
-  if(exp > Date.now()){
-    const name = localStorage.getItem(TOKEN_NAME_KEY)||'';
-    const pic  = localStorage.getItem(TOKEN_PIC_KEY)||'';
-    showUser(name, pic);
-    loadAll();
-    return;
-  }
-  // Show Google sign-in
-  google.accounts.id.initialize({client_id:'1031858151521-k4a6p25nd81oiuio7id9d9p5odacgqdr.apps.googleusercontent.com',callback:handleCredential,auto_select:true});
-  google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'zh-TW',width:280});
-  google.accounts.id.prompt();
-}
-
-function handleCredential(response){
-  const base64url = response.credential.split('.')[1];
-  const base64 = base64url.replace(/-/g,'+').replace(/_/g,'/');
-  const payload = JSON.parse(atob(base64));
-  const email = payload.email||'';
-  const domain = email.split('@')[1]||'';
-  if(domain !== ALLOWED_DOMAIN){
-    const err=document.getElementById('loginErr');
-    err.textContent='帳號 '+email+' 沒有存取權限，請用 @wingea.vip 帳號登入。';
-    err.style.display='block';
-    return;
-  }
-  // Store token for 7 days
-  localStorage.setItem(TOKEN_EXP_KEY, String(Date.now()+TOKEN_TTL));
-  localStorage.setItem(TOKEN_NAME_KEY, payload.name||email);
-  localStorage.setItem(TOKEN_PIC_KEY, payload.picture||'');
-  showUser(payload.name||email, payload.picture||'');
-  loadAll();
-}
-
-function showUser(name, pic){
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('userInfo').innerHTML=
-    (pic?`<img src="${pic}" class="user-avatar" title="${esc(name)}">`:'<div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff">'+esc(name.charAt(0))+'</div>') +
-    `<button class="btn-signout" onclick="signOut()">登出</button>`;
-}
-
-function signOut(){
-  localStorage.removeItem(TOKEN_EXP_KEY);
-  localStorage.removeItem(TOKEN_NAME_KEY);
-  localStorage.removeItem(TOKEN_PIC_KEY);
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('userInfo').innerHTML='';
-  document.getElementById('mainContent').innerHTML='<div class="state"><div class="spin"></div>請先登入</div>';
-  if(typeof google!=='undefined'&&google.accounts) google.accounts.id.disableAutoSelect();
-}
-
-function waitForGoogle(){
-  if(typeof google!=='undefined'&&google.accounts&&google.accounts.id) initAuth();
-  else setTimeout(waitForGoogle,100);
-}
-waitForGoogle();
-
-// ── API ──────────────────────────────────────────────
-async function apiGet(a){const r=await fetch(`${API_URL}?action=${a}`);return r.json();}
-async function apiPost(b){
-  const encoded=encodeURIComponent(JSON.stringify(b));
-  const r=await fetch(`${API_URL}?payload=${encoded}`);
-  return r.json();
-}
-
-async function loadAll(){
-  try{
-    document.getElementById('syncLabel').textContent='載入中…';
-    const [pRes,sRes,cRes]=await Promise.all([apiGet('getAll'),apiGet('getSites'),apiGet('getCurrencies')]);
-    DATA=pRes.providers||[];
-    SITE_INFO=sRes.sites||[];
-    CURRENCIES=cRes.currencies||[];
-    // 從站點資料動態建立 SITE_ORDER / SITE_LABEL / SITE_NAME / DD_CFG.site.opts
-    SITE_ORDER=SITE_INFO.map(function(s){return s.id;});
-    SITE_LABEL={};SITE_NAME={};
-    SITE_INFO.forEach(function(s){
-      SITE_LABEL[s.id]=s.name+' '+s.id;
-      SITE_NAME[s.id]=s.name;
-    });
-    DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
-    // Set default active currency
-    if(CURRENCIES.length&&!activeCur) activeCur=CURRENCIES[0].code;
-    buildCurBar();
-    buildDDFromData();
-    document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    render();
-  }catch(e){
-    document.getElementById('mainContent').innerHTML=`<div class="state"><div style="font-size:28px;margin-bottom:10px">⚠</div><div style="color:var(--red);margin-bottom:6px">無法連線</div><div style="font-size:12px;color:var(--t3)">${e.message}</div></div>`;
-    document.getElementById('syncLabel').textContent='連線失敗';
-  }
-}
-
-function buildDDFromData(){
-  // Extract unique sources from data
-  const srcs=[...new Set(DATA.map(function(d){return d.source;}).filter(Boolean))].sort();
-  DD_CFG.src.opts=srcs.map(function(v){return{v:v,l:v};});
-}
-
-// ── Currency bar ──────────────────────────────────────
-function buildCurBar(){
-  const bar=document.getElementById('curBar');
-  bar.innerHTML=CURRENCIES.map(function(cur){
-    const isActive=activeCur===cur.code;
-    const isPinned=pinnedCurs.has(cur.code);
-    const cls=isPinned?'cur-tab pinned':isActive?'cur-tab active':'cur-tab';
-    return `<button class="${cls}" id="curtab_${cur.code}" onclick="clickCurTab('${cur.code}',event)">
-      ${cur.label}
-      <span class="cur-pin-btn" onclick="pinCur('${cur.code}',event)" title="${isPinned?'取消固定':'固定比較'}">${isPinned?'📌':'📌'}</span>
-    </button>`;
-  }).join('');
-  const pinCount=pinnedCurs.size;
-  document.getElementById('compareHint').textContent=pinCount>1?`📌 比較中：${pinCount} 個幣別`:'';
-}
-
-function clickCurTab(code, e){
-  if(e.target.classList.contains('cur-pin-btn')) return;
-  activeCur=code;
-  buildCurBar();
-  render();
-}
-
-function pinCur(code, e){
-  e.stopPropagation();
-  if(pinnedCurs.has(code)) pinnedCurs.delete(code);
-  else pinnedCurs.add(code);
-  buildCurBar();
-  render();
-}
-
-// ── View mode ─────────────────────────────────────────
-function switchViewMode(v){
-  viewMode=v;
-  document.getElementById('vm_cur').className='vm-tab'+(v==='currency'?' on':'');
-  document.getElementById('vm_site').className='vm-tab'+(v==='site_rate'?' on':'');
-  document.getElementById('vm_overview').className='vm-tab'+(v==='site_overview'?' on':'');
-  document.getElementById('curTabRow').style.display=v==='currency'?'':'none';
-  render();
-}
-
-// ── Dropdown ─────────────────────────────────────────
-function renderDDList(type,query){
-  query=query||'';
-  const opts=DD_CFG[type].opts.filter(function(o){return(o.l||o.v).toLowerCase().includes(query.toLowerCase());});
-  const sel=ddSel[type];
-  const el=document.getElementById('dd_'+type+'_list');
-  if(!opts.length){el.innerHTML='<div class="dd-empty">無結果</div>';return;}
-  el.innerHTML=opts.map(function(o){
-    const on=sel.has(o.v);
-    const dot=o.dot?`<span class="dd-dot" style="background:${o.dot}"></span>`:'';
-    return `<div class="dd-item${on?' on':''}" onclick="toggleDDOpt('${type}','${o.v}');event.stopPropagation()">
-      <div class="dd-cb">${on?'✓':''}</div>${dot}<span>${o.l}</span>
-    </div>`;
-  }).join('');
-}
-function toggleDD(type){
-  const was=ddOpen[type];
-  Object.keys(ddOpen).forEach(function(k){if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}});
-  if(!was){ddOpen[type]=true;document.getElementById('dd_'+type+'_menu').style.display='';document.getElementById('dd_'+type+'_btn').classList.add('open');renderDDList(type);}
-}
-function toggleDDOpt(type,val){const s=ddSel[type];if(s.has(val))s.delete(val);else s.add(val);renderDDList(type);updateBadge(type);updateSelStrip();render();}
-function clearDD(type){ddSel[type].clear();renderDDList(type);updateBadge(type);updateSelStrip();render();}
-function allDD(type){DD_CFG[type].opts.forEach(function(o){ddSel[type].add(o.v);});renderDDList(type);updateBadge(type);updateSelStrip();render();}
-function updateBadge(type){const n=ddSel[type].size;const b=document.getElementById('dd_'+type+'_badge');b.textContent=n;b.style.display=n?'':'none';document.getElementById('dd_'+type+'_btn').classList.toggle('has',n>0);}
-function updateSelStrip(){
-  const strip=document.getElementById('selStripRow');
-  const tags=[];
-  [{k:'cat',opts:CAT_OPTS},{k:'src',opts:DD_CFG.src.opts},{k:'site',opts:DD_CFG.site.opts}].forEach(function(cfg){
-    ddSel[cfg.k].forEach(function(v){const o=cfg.opts.find(function(x){return x.v===v;});const lbl=o?o.l:v;tags.push(`<span class="sel-tag">${lbl}<span class="rm" onclick="toggleDDOpt('${cfg.k}','${v}')"> ×</span></span>`);});
-  });
-  strip.innerHTML=tags.join('');
-  strip.style.display=tags.length?'flex':'none';
-}
-function clearAll(){
-  ['cat','src','site'].forEach(function(t){ddSel[t].clear();updateBadge(t);});
-  updateSelStrip();
-  document.getElementById('q').value='';
-  render();
-}
-document.addEventListener('click',function(e){if(!e.target.closest('.dd')){Object.keys(ddOpen).forEach(function(k){if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}});}});
-
-// ── Filter & Sort ─────────────────────────────────────
-function ck(id){return document.getElementById(id)&&document.getElementById(id).checked;}
-function pct(v){if(v===null||v===undefined)return null;if(v==='N/A')return 'N/A';return (v*100).toFixed(1)+'%';}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function getFiltered(){
-  const q=document.getElementById('q').value.toLowerCase();
-  return DATA.filter(function(d){
-    if(q&&!d.en.toLowerCase().includes(q)&&!d.cn.includes(q)&&!(d.source||'').toLowerCase().includes(q)&&!(d.prov_code||'').toLowerCase().includes(q))return false;
-    if(ddSel.cat.size&&!ddSel.cat.has(d.cat))return false;
-    if(ddSel.src.size&&!ddSel.src.has(d.source))return false;
-    if(ddSel.site.size){const has=[...ddSel.site].some(function(s){const sv=d.sites&&d.sites[s];return sv&&sv.r!==null;});if(!has)return false;}
-    return true;
-  });
-}
-
-function doSort(k){if(sortK===k)sortD=-sortD;else{sortK=k;sortD=1;}render();}
-function sarr(k){if(sortK!==k)return'<span class="sarr">↕</span>';return`<span class="sarr">${sortD>0?'↑':'↓'}</span>`;}
-function th(k,l,ex){ex=ex||'';return`<th onclick="doSort('${k}')" class="${sortK===k?'sorted':''}" ${ex}>${l}${sarr(k)}</th>`;}
-
-// ── Render ────────────────────────────────────────────
-function render(){
-  if(!DATA.length)return;
-  let data=getFiltered();
-  if(sortK){
-    data.sort(function(a,b){
-      if(sortK==='en')return sortD*a.en.localeCompare(b.en);
-      if(sortK==='cat')return sortD*a.cat.localeCompare(b.cat);
-      if(sortK==='src')return sortD*(a.source||'').localeCompare(b.source||'');
-      return 0;
-    });
-  }
-  if(viewMode==='currency') renderCurrencyTable(data);
-  else if(viewMode==='site_rate') renderSiteRateTable(data);
-  else renderSiteOverview(data);
-}
-
-function baseColumns(d,skipEnabled){
-  let r=`<td class="sticky-col td-name" style="min-width:160px;max-width:180px">
-    <div class="td-en">${esc(d.en)}</div><div class="td-cn">${esc(d.cn)}</div>
-    ${d.note?`<div class="td-note">${esc(d.note)}</div>`:''}
-  </td>`;
-  r+=`<td><span class="badge ${CAT_CLS[d.cat]||'b-esports'}">${CAT_LBL[d.cat]||d.cat}</span></td>`;
-  if(ck('ck_src'))  r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
-  if(ck('ck_cat_icon'))r+=`<td class="mono">${d.cat_icon?esc(d.cat_icon.slice(0,20))+'…':'—'}</td>`;
-  if(ck('ck_bal_icon'))r+=`<td class="mono">${d.bal_icon?esc(d.bal_icon.slice(0,20))+'…':'—'}</td>`;
-  if(ck('ck_prov'))r+=`<td class="mono">${d.prov_code?`<span title="${esc(d.prov_code)}">${esc(d.prov_code)}</span>`:'—'}</td>`;
-  if(ck('ck_ext')) r+=`<td class="mono">${d.ext_cat||'—'}</td>`;
-  if(ck('ck_ctrl'))r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
-  if(ck('ck_enabled')&&!skipEnabled)r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
-  return r;
-}
-
-function baseHead(skipEnabled){
-  let h='<th class="sticky-col">供應商</th><th>類別</th>';
-  if(ck('ck_src'))  h+='<th>遊戲來源</th>';
-  if(ck('ck_cat_icon'))h+='<th>category_icon</th>';
-  if(ck('ck_bal_icon'))h+='<th>balance_icon</th>';
-  if(ck('ck_prov'))h+='<th>provider_code</th>';
-  if(ck('ck_ext')) h+='<th>ext_category_code</th>';
-  if(ck('ck_ctrl'))h+='<th style="text-align:center">可控</th>';
-  if(ck('ck_enabled')&&!skipEnabled)h+='<th style="text-align:center">預設啟用</th>';
-  return h;
-}
-
-function fmtRate(v){
-  if(v===null||v===undefined)return '<span class="na-val">—</span>';
-  if(v==='N/A')return '<span class="na-val">不支持</span>';
-  return pct(v);
-}
-
-// ── Currency table ────────────────────────────────────
-function renderCurrencyTable(data){
-  // Determine which currencies to show
-  const showCurs=[];
-  if(pinnedCurs.size>1){
-    CURRENCIES.forEach(function(c){if(pinnedCurs.has(c.code))showCurs.push(c);});
-  } else {
-    const found=CURRENCIES.find(function(c){return c.code===activeCur;});
-    if(found)showCurs.push(found);
-  }
-  if(!showCurs.length){document.getElementById('mainContent').innerHTML='<div class="state">請先選擇幣別</div>';return;}
-
-  const isCompare=showCurs.length>1;
-  let head='<tr>'+baseHead();
-  if(isCompare){
-    showCurs.forEach(function(cur){
-      head+=`<th colspan="6" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
-    });
-  } else {
-    head+='<th class="r">原始費率</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th><th style="text-align:center">預設啟用</th>';
-  }
-  head+='<th style="text-align:center">操作</th></tr>';
-
-  if(isCompare){
-    // second header row for sub-columns
-    head+='<tr class="cur-hdr"><th class="sticky-col"></th><th></th>';
-    if(ck('ck_src'))head+='<th></th>';
-    if(ck('ck_cat_icon'))head+='<th></th>';
-    if(ck('ck_bal_icon'))head+='<th></th>';
-    if(ck('ck_prov'))head+='<th></th>';
-    if(ck('ck_ext'))head+='<th></th>';
-    if(ck('ck_ctrl'))head+='<th></th>';
-    if(ck('ck_enabled'))head+='<th></th>';
-    showCurs.forEach(function(){
-      head+='<th class="r" style="border-left:2px solid #c7d2fe">原始</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th><th style="text-align:center">啟用</th>';
-    });
-    head+='<th></th></tr>';
-  }
-
-  let rows=data.map(function(d){
-    let r='<tr>'+baseColumns(d);
-    if(isCompare){
-      showCurs.forEach(function(cur,ci){
-        const cd=(d.currencies&&d.currencies[cur.code])||{};
-        const borderStyle=ci===0?'border-left:2px solid #c7d2fe':'';
-        r+=`<td class="td-rc" style="${borderStyle}">${fmtRate(cd.orig)}</td>`;
-        r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
-        r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
-        r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-        r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
-        r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
-      });
+// ── GET ───────────────────────────────────────────────────
+function doGet(e) {
+  var result;
+  try {
+    if (e.parameter.payload) {
+      var body = JSON.parse(e.parameter.payload);
+      var a = body.action;
+      if      (a === 'addProvider')    result = addProvider(body.data);
+      else if (a === 'updateProvider') result = updateProvider(body.data);
+      else if (a === 'deleteProvider') result = deleteProvider(body.id);
+      else if (a === 'updateSiteRate') result = updateSiteRate(body.siteId, body.providerId, body.rate, body.enabled);
+      else result = { error: 'Unknown action: ' + a };
     } else {
-      const cur=showCurs[0];
-      const cd=(d.currencies&&d.currencies[cur.code])||{};
-      r+=`<td class="td-rc">${fmtRate(cd.orig)}</td>`;
-      r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
-      r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
-      r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-      r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
-      r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
+      var action = e.parameter.action || 'getAll';
+      if      (action === 'getAll')        result = getAllData();
+      else if (action === 'getSites')      result = getSiteOverview();
+      else if (action === 'getCurrencies') result = getCurrencyConfig();
+      else result = { error: 'Unknown action: ' + action };
     }
-    r+=`<td class="td-ctr"><div class="abtns">
-      <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
-      <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
-    </div></td></tr>`;
-    return r;
-  }).join('');
-
-  document.getElementById('mainContent').innerHTML=`
-    <div class="tbl-outer">
-      <table><thead>${head}</thead><tbody>${rows||emptyRow()}</tbody></table>
-      <div class="tbl-footer">共 ${data.length} 筆　·　幣別：${showCurs.map(function(c){return c.label;}).join(' + ')}</div>
-    </div>`;
+  } catch(err) {
+    result = { error: err.message };
+  }
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
-// ── Site rate table ───────────────────────────────────
-function renderSiteRateTable(data){
-  const activeSites=ddSel.site.size?[...ddSel.site]:SITE_ORDER;
-  let head='<tr>'+baseHead(true); // skip enabled col - shown inline on rate cells
-  activeSites.forEach(function(s){
-    head+=`<th style="text-align:right">${SITE_LABEL[s].split(' ')[0]}</th>`;
-  });
-  head+='<th style="text-align:center">操作</th></tr>';
+// ── Helpers ───────────────────────────────────────────────
+function num(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  var n = parseFloat(v);
+  return isNaN(n) ? null : Math.round(n * 100000) / 100000;
+}
+function str(v) {
+  return (v === null || v === undefined) ? '' : String(v).trim();
+}
+function origVal(v) {
+  if (v === '' || v === null || v === undefined) return null;
+  var s = String(v).trim();
+  if (s === '不支持' || s === '不支援') return 'N/A';
+  var n = parseFloat(s);
+  return isNaN(n) ? null : Math.round(n * 100000) / 100000;
+}
 
-  let rows=data.map(function(d){
-    let r='<tr>'+baseColumns(d,true); // skip enabled col
-    activeSites.forEach(function(s){
-      const sv=(d.sites&&d.sites[s])||{};
-      if(!sv||sv.r===null){
-        r+=`<td class="null-cell" onclick="editSiteRate(${d.id},'${s}',null,null)">＋</td>`;
-      } else {
-        const profitStr=sv.p!==null&&sv.p!==undefined?`<div class="profit">+${pct(sv.p)}</div>`:'';
-        // 預設啟用 ✓/✗ 只在勾選「預設啟用」時才顯示在費率旁邊
-        const enabledMark=ck('ck_enabled')
-          ?(sv.enabled==='Y'?'<span style="font-size:9px;color:var(--green)"> ✓</span>':sv.enabled==='N'?'<span style="font-size:9px;color:var(--t3)"> ✗</span>':'')
-          :'';
-        r+=`<td class="rc-click" onclick="editSiteRate(${d.id},'${s}',${sv.r},${JSON.stringify(sv.enabled||'')})">
-          <span style="font-size:12px">${pct(sv.r)}${enabledMark}</span>${profitStr}
-        </td>`;
+// ── getCurrencyConfig ──────────────────────────────────────
+function getCurrencyConfig() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(CURRENCY_CONFIG_SHEET);
+  if (!sh) return { currencies: [] };
+  var rows = sh.getDataRange().getValues();
+  var currencies = [];
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (!r[0]) continue;
+    var siteIds = r[4] ? String(r[4]).split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+    currencies.push({
+      code:    str(r[0]),
+      label:   str(r[1]),
+      sheet:   str(r[2]),
+      origCol: str(r[3]),
+      siteIds: siteIds,
+    });
+  }
+  return { currencies: currencies };
+}
+
+// ── getSiteConfig (從站點統整讀取站點清單 + sheet名稱) ────
+function getSiteConfig() {
+  var ss   = SpreadsheetApp.getActiveSpreadsheet();
+  var sh   = ss.getSheetByName(SITE_OVERVIEW_SHEET);
+  var rows = sh.getDataRange().getValues();
+  var hdrs = rows[0];
+  function c(n) { return hdrs.indexOf(n); }
+  var sites = [];
+  for (var i = 1; i < rows.length; i++) {
+    var r = rows[i];
+    if (!str(r[c('站點ID')])) continue;
+    var sheetName = str(r[c('費率Sheet名稱')]);
+    if (!sheetName) continue; // 沒有對應 sheet 就跳過（如 IDR001）
+    sites.push({
+      id:        str(r[c('站點ID')]),
+      name:      str(r[c('站點名稱')]),
+      backend:   str(r[c('後端站點編號')]),
+      currency:  str(r[c('幣別')]),
+      plan:      str(r[c('方案')]),
+      lang:      str(r[c('默認語系')]),
+      langs:     str(r[c('支持語系')]),
+      deposit:   num(r[c('押金')])    || 0,
+      setup:     num(r[c('開站費')])   || 0,
+      maint:     num(r[c('維護費')])   || 0,
+      monthly:   num(r[c('每月買分')]) || 0,
+      note:      str(r[c('備註')]),
+      sheetName: sheetName,
+    });
+  }
+  return sites;
+}
+
+// ── getSiteOverview (給前端用) ────────────────────────────
+function getSiteOverview() {
+  return { sites: getSiteConfig() };
+}
+
+// ── getAllData ─────────────────────────────────────────────
+function getAllData() {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var curConfig = getCurrencyConfig().currencies;
+  var siteConf  = getSiteConfig(); // 動態站點清單
+
+  // 各幣別費率
+  var curData = {};
+  curConfig.forEach(function(cur) {
+    curData[cur.code] = {};
+    var sh = ss.getSheetByName(cur.sheet);
+    if (!sh) return;
+    var rows = sh.getDataRange().getValues();
+    var hdrs = rows[0];
+    var idCol  = hdrs.indexOf('id');
+    if (idCol === -1) return;
+    var p1Col  = hdrs.indexOf('方案一費率') !== -1 ? hdrs.indexOf('方案一費率') : hdrs.indexOf('方案一费率');
+    var p2Col  = hdrs.indexOf('方案二費率') !== -1 ? hdrs.indexOf('方案二費率') : hdrs.indexOf('方案二费率');
+    var p3Col  = hdrs.indexOf('方案三費率') !== -1 ? hdrs.indexOf('方案三費率') : hdrs.indexOf('方案三费率');
+    var offCol = hdrs.indexOf('官方費率(init)') !== -1 ? hdrs.indexOf('官方費率(init)') : hdrs.indexOf('官方费率');
+    var origCol    = hdrs.indexOf(cur.origCol);
+    var enabledCol = hdrs.indexOf('預設啟用');
+    for (var i = 1; i < rows.length; i++) {
+      var id = parseInt(rows[i][idCol]);
+      if (isNaN(id)) continue;
+      curData[cur.code][id] = {
+        p1:       p1Col      !== -1 ? num(rows[i][p1Col])       : null,
+        p2:       p2Col      !== -1 ? num(rows[i][p2Col])       : null,
+        p3:       p3Col      !== -1 ? num(rows[i][p3Col])       : null,
+        official: offCol     !== -1 ? num(rows[i][offCol])      : null,
+        orig:     origCol    !== -1 ? origVal(rows[i][origCol]) : null,
+        enabled:  enabledCol !== -1 ? str(rows[i][enabledCol])  : '',
+      };
+    }
+  });
+
+  // 各站點費率（動態從站點統整讀取）
+  var siteData = {};
+  siteConf.forEach(function(site) {
+    siteData[site.id] = {};
+    var sh = ss.getSheetByName(site.sheetName);
+    if (!sh) return;
+    var rows       = sh.getDataRange().getValues();
+    var hdrs       = rows[0];
+    var idCol      = hdrs.indexOf('id');
+    var rateCol    = hdrs.indexOf('your_rate') !== -1 ? hdrs.indexOf('your_rate') : hdrs.indexOf('方案三费率');
+    var enabledCol = hdrs.indexOf('預設啟用');
+    // 找原始費率欄（對應幣別設定）
+    var origCol = -1;
+    curConfig.forEach(function(cur) {
+      if (cur.siteIds.indexOf(site.id) !== -1) {
+        var oc = hdrs.indexOf(cur.origCol);
+        if (oc !== -1) origCol = oc;
       }
     });
-    r+=`<td class="td-ctr"><div class="abtns">
-      <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
-      <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
-    </div></td></tr>`;
-    return r;
-  }).join('');
+    for (var i = 1; i < rows.length; i++) {
+      var id = parseInt(rows[i][idCol]);
+      if (isNaN(id)) continue;
+      var rate = rateCol !== -1 ? num(rows[i][rateCol]) : null;
+      var orig = origCol !== -1 ? origVal(rows[i][origCol]) : null;
+      var profit = null;
+      if (rate !== null && orig !== null && orig !== 'N/A') {
+        profit = Math.round((rate - orig) * 100000) / 100000;
+      }
+      siteData[site.id][id] = {
+        r:       rate,
+        p:       profit,
+        orig:    orig,
+        enabled: enabledCol !== -1 ? str(rows[i][enabledCol]) : '',
+      };
+    }
+  });
 
-  document.getElementById('mainContent').innerHTML=`
-    <div class="tbl-outer">
-      <table><thead>${head}</thead><tbody>${rows||emptyRow()}</tbody></table>
-      <div class="tbl-footer">共 ${data.length} 筆　·　點費率格可直接修改　·　＋ 表示尚未設定</div>
-    </div>`;
+  // 主表
+  var mainSh   = ss.getSheetByName(MAIN_SHEET);
+  var mainData = mainSh.getDataRange().getValues();
+  var mHdrs    = mainData[0];
+  function c(name) { return mHdrs.indexOf(name); }
+
+  var providers = [];
+  for (var i = 1; i < mainData.length; i++) {
+    var r  = mainData[i];
+    var en = r[c('供應商英文名')];
+    if (!en || String(en).trim() === '') continue;
+    var id = parseInt(r[c('id')]);
+
+    var sites = {};
+    siteConf.forEach(function(site) {
+      sites[site.id] = siteData[site.id][id] || { r: null, p: null, orig: null, enabled: '' };
+    });
+
+    var currencies = {};
+    curConfig.forEach(function(cur) {
+      currencies[cur.code] = curData[cur.code][id] || { p1: null, p2: null, p3: null, official: null, orig: null, enabled: '' };
+    });
+
+    providers.push({
+      id:        id,
+      en:        str(r[c('供應商英文名')]),
+      cn:        str(r[c('供應商中文名')]),
+      cat:       str(r[c('Category')]),
+      source:    str(r[c('遊戲來源')]),
+      ctrl:      str(r[c('可控')]),
+      enabled:   str(r[c('預設啟用')]),
+      note:      str(r[c('備註')]),
+      cat_icon:  str(r[c('category_icon')]),
+      bal_icon:  str(r[c('balance_icon')]),
+      prov_code: str(r[c('provider_code')]),
+      ext_cat:   str(r[c('external_category_code')]),
+      currencies: currencies,
+      sites:      sites,
+    });
+  }
+  return { providers: providers, updatedAt: new Date().toISOString() };
 }
 
-function emptyRow(){return'<tr><td colspan="40" style="text-align:center;padding:24px;color:var(--t3)">無符合結果</td></tr>';}
+// ── updateProvider ─────────────────────────────────────────
+function updateProvider(data) {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var siteConf  = getSiteConfig();
 
-// ── Site overview ─────────────────────────────────────
-function renderSiteOverview(filteredData){
-  const cards=SITE_INFO.map(function(si){
-    const count=filteredData.filter(function(d){return d.sites&&d.sites[si.id]&&d.sites[si.id].r!==null;}).length;
-    return `<div class="sc">
-      <div class="sc-head"><div class="sc-name">${esc(si.name)}<span class="sc-id">${si.id}</span></div><div class="sc-backend">${si.backend}</div></div>
-      <div class="sc-body">
-        <div class="sc-row"><span class="sc-lbl">幣別</span><span class="sc-val">${si.currency}</span></div>
-        <div class="sc-row"><span class="sc-lbl">方案</span><span class="sc-val">${si.plan}</span></div>
-        <div class="sc-row"><span class="sc-lbl">默認語系</span><span class="sc-val">${si.lang}</span></div>
-        <div class="sc-row"><span class="sc-lbl">支持語系</span><span class="sc-val" style="font-size:11px">${si.langs}</span></div>
-        <div class="sc-row"><span class="sc-lbl">押金</span><span class="sc-val">${si.deposit>0?si.deposit+' u':'免'}</span></div>
-        <div class="sc-row"><span class="sc-lbl">開站費</span><span class="sc-val">${si.setup>0?si.setup+' u':'免'}</span></div>
-        <div class="sc-row"><span class="sc-lbl">維護費</span><span class="sc-val">${si.maint>0?si.maint+' u / 月':'免'}</span></div>
-        <div class="sc-row"><span class="sc-lbl">每月買分</span><span class="sc-val">${si.monthly||0}</span></div>
-        ${si.note?`<div class="sc-row"><span class="sc-lbl">備註</span><span class="sc-val warn">${esc(si.note)}</span></div>`:''}
-        <div class="sc-count">${count} 個供應商已設費率</div>
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('mainContent').innerHTML=`<div class="site-grid">${cards}</div>`;
-}
+  var mainSh = ss.getSheetByName(MAIN_SHEET);
+  var rows   = mainSh.getDataRange().getValues();
+  var hdrs   = rows[0];
+  function c(n) { return hdrs.indexOf(n); }
+  var rowIdx = -1;
+  for (var i = 1; i < rows.length; i++) {
+    if (parseInt(rows[i][c('id')]) === parseInt(data.id)) { rowIdx = i + 1; break; }
+  }
+  if (rowIdx === -1) throw new Error('Provider not found: ' + data.id);
 
-// ── Inline site rate edit ─────────────────────────────
-function editSiteRate(id,siteId,curRate,curEnabled){
-  const rStr=curRate!==null&&curRate!==undefined?(curRate*100).toFixed(1):'';
-  const rate=prompt(`[${SITE_LABEL[siteId]}] 費率 (%)\n目前：${rStr||'未設定'}`,rStr);
-  if(rate===null)return;
-  const enabled=prompt(`[${SITE_LABEL[siteId]}] 預設啟用？Y / N\n目前：${curEnabled||'未設定'}`,curEnabled||'Y');
-  if(enabled===null)return;
-  const rv=rate===''?null:parseFloat(rate)/100;
-  const ev=enabled.toUpperCase()==='Y'?'Y':enabled.toUpperCase()==='N'?'N':'';
-  apiPost({action:'updateSiteRate',siteId:siteId,providerId:id,rate:rv,enabled:ev})
-    .then(function(res){
-      if(res.error){toast('錯誤：'+res.error,true);return;}
-      // Update local data
-      DATA.forEach(function(d){
-        if(d.id===id&&d.sites){
-          if(!d.sites[siteId])d.sites[siteId]={};
-          // recalculate profit
-          const orig=d.sites[siteId].orig;
-          const profit=(rv!==null&&orig!==null&&orig!=='N/A')?Math.round((rv-orig)*100000)/100000:null;
-          d.sites[siteId].r=rv;
-          d.sites[siteId].p=profit;
-          d.sites[siteId].enabled=ev;
+  var map = {
+    '供應商英文名': data.en, '供應商中文名': data.cn,
+    'Category': data.cat,   '遊戲來源': data.source,
+    '可控': data.ctrl,       '預設啟用': data.enabled,
+    '備註': data.note,       'category_icon': data.cat_icon,
+    'balance_icon': data.bal_icon, 'provider_code': data.prov_code,
+    'external_category_code': data.ext_cat,
+    'game_category': 'external', 'currency': 'usdt',
+  };
+  Object.keys(map).forEach(function(name) {
+    var col = c(name);
+    if (col !== -1 && map[name] !== undefined) {
+      mainSh.getRange(rowIdx, col + 1).setValue(map[name] !== null ? map[name] : '');
+    }
+  });
+
+  if (data.currencies) _writeCurrencyRates(data.id, data.currencies);
+
+  if (data.sites) {
+    var curConfig2 = getCurrencyConfig().currencies;
+    siteConf.forEach(function(site) {
+      var sd = data.sites[site.id];
+      if (!sd) return;
+      // 找對應幣別的官方費率
+      var officialRate = null;
+      curConfig2.forEach(function(cur) {
+        if (cur.siteIds.indexOf(site.id) !== -1 && data.currencies && data.currencies[cur.code]) {
+          officialRate = data.currencies[cur.code].official;
         }
       });
-      toast('已更新 ✓');render();
-    }).catch(function(e){toast('連線錯誤：'+e.message,true);});
-}
-
-// ── Modal ─────────────────────────────────────────────
-function pctVal(v){ // 把存的小數轉成百分比顯示，如 0.05 → 5
-  if(v===null||v===undefined||v==='N/A')return '';
-  return Math.round(v*10000)/100; // 保留2位
-}
-
-function buildCurBlocks(currenciesData){
-  return CURRENCIES.map(function(cur){
-    const cd=(currenciesData&&currenciesData[cur.code])||{};
-    const isUnsup=cd.orig==='N/A';
-    return `<div class="cur-block">
-      <div class="cb-head">
-        <span class="cb-code">${cur.label}</span>
-        <div class="cb-unsupported">
-          不支持
-          <div class="tog ${isUnsup?'on':''}" id="unsup_${cur.code}" onclick="toggleUnsup('${cur.code}')"><div class="tog-th"></div></div>
-        </div>
-      </div>
-      <div class="cb-body ${isUnsup?'dim':''}" id="cb_body_${cur.code}">
-        <div class="fgp">
-          <label class="fl">原始費率 (%)</label>
-          <input class="fi" id="cr_orig_${cur.code}" type="number" step="0.1" value="${pctVal(cd.orig)}" placeholder="5" oninput="autoFillRates('${cur.code}')">
-        </div>
-        <div class="fgp">
-          <label class="fl">方案一 (+4%)</label>
-          <input class="fi" id="cr_p1_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p1)}" placeholder="自動">
-        </div>
-        <div class="fgp">
-          <label class="fl">方案二 (+4%)</label>
-          <input class="fi" id="cr_p2_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p2)}" placeholder="自動">
-        </div>
-        <div class="fgp">
-          <label class="fl">方案三 (+6%)</label>
-          <input class="fi" id="cr_p3_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p3)}" placeholder="自動">
-        </div>
-        <div class="fgp">
-          <label class="fl">官方費率 (+7%)</label>
-          <input class="fi" id="cr_off_${cur.code}" type="number" step="0.1" value="${pctVal(cd.official)}" placeholder="自動">
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleUnsup(code){
-  const tog=document.getElementById('unsup_'+code);
-  const body=document.getElementById('cb_body_'+code);
-  const on=tog.classList.toggle('on');
-  body.classList.toggle('dim',on);
-  if(on){
-    ['cr_orig_','cr_p1_','cr_p2_','cr_p3_','cr_off_'].forEach(function(pfx){
-      const el=document.getElementById(pfx+code);
-      if(el){el.value='';el.disabled=true;}
+      _writeSiteRate(site, data.id, sd.r, sd.enabled, officialRate);
     });
-  } else {
-    ['cr_orig_','cr_p1_','cr_p2_','cr_p3_','cr_off_'].forEach(function(pfx){
-      const el=document.getElementById(pfx+code);
-      if(el)el.disabled=false;
-    });
+  }
+  return { success: true };
+}
+
+// ── addProvider ────────────────────────────────────────────
+function addProvider(data) {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var siteConf  = getSiteConfig();
+  var curConfig = getCurrencyConfig().currencies;
+  var mainSh    = ss.getSheetByName(MAIN_SHEET);
+  var rows      = mainSh.getDataRange().getValues();
+  var hdrs      = rows[0];
+  function c(n) { return hdrs.indexOf(n); }
+
+  var maxId = 0;
+  for (var i = 1; i < rows.length; i++) {
+    var id = parseInt(rows[i][c('id')]);
+    if (!isNaN(id) && id > maxId) maxId = id;
+  }
+  var newId  = maxId + 1;
+  var newRow = new Array(hdrs.length).fill('');
+  var vals = {
+    'id': newId, '供應商英文名': data.en, '供應商中文名': data.cn,
+    'Category': data.cat, '遊戲來源': data.source,
+    '可控': data.ctrl, '預設啟用': data.enabled, '備註': data.note,
+    'category_icon': data.cat_icon || '', 'balance_icon': data.bal_icon || '',
+    'provider_code': data.prov_code || '', 'external_category_code': data.ext_cat || '',
+    'game_category': 'external', 'currency': 'usdt',
+  };
+  Object.keys(vals).forEach(function(k) {
+    var col = c(k); if (col !== -1) newRow[col] = vals[k];
+  });
+  mainSh.appendRow(newRow);
+
+  // 寫入所有幣別 sheet（不管是否支持都要新增一列）
+  // CNY sheet 跳過，因為主表 (MAIN_SHEET) 就是 CNY，已在上方寫入
+  curConfig.forEach(function(cur) {
+    if (cur.sheet === MAIN_SHEET) return; // 跳過主表，避免重複
+    var cd = (data.currencies && data.currencies[cur.code]) || {};
+    var sh = ss.getSheetByName(cur.sheet);
+    if (!sh) return;
+    var shRows = sh.getDataRange().getValues();
+    var shHdrs = shRows[0];
+    function sc(n) { return shHdrs.indexOf(n); }
+    var newShRow = new Array(shHdrs.length).fill('');
+    // 填入 id 和基本資料
+    if (sc('id')     !== -1) newShRow[sc('id')]     = newId;
+    if (sc('供應商英文名') !== -1) newShRow[sc('供應商英文名')] = data.en || '';
+    if (sc('供應商中文名') !== -1) newShRow[sc('供應商中文名')] = data.cn || '';
+    if (sc('Category')  !== -1) newShRow[sc('Category')]  = data.cat || '';
+    if (sc('遊戲來源')  !== -1) newShRow[sc('遊戲來源')]  = data.source || '';
+    if (sc('可控')      !== -1) newShRow[sc('可控')]      = data.ctrl || '';
+    if (sc('預設啟用')  !== -1) newShRow[sc('預設啟用')]  = data.enabled || '';
+    if (sc('備註')      !== -1) newShRow[sc('備註')]      = data.note || '';
+    if (sc('provider_code') !== -1) newShRow[sc('provider_code')] = data.prov_code || '';
+    if (sc('external_category_code') !== -1) newShRow[sc('external_category_code')] = data.ext_cat || '';
+    if (sc('game_category') !== -1) newShRow[sc('game_category')] = 'external';
+    if (sc('currency')      !== -1) newShRow[sc('currency')]      = 'usdt';
+    // 填入費率
+    var p1Col  = sc('方案一費率') !== -1 ? sc('方案一費率') : sc('方案一费率');
+    var p2Col  = sc('方案二費率') !== -1 ? sc('方案二費率') : sc('方案二费率');
+    var p3Col  = sc('方案三費率') !== -1 ? sc('方案三費率') : sc('方案三费率');
+    var offCol = sc('官方費率(init)') !== -1 ? sc('官方費率(init)') : sc('官方费率');
+    var origCol = sc(cur.origCol);
+    if (p1Col   !== -1) newShRow[p1Col]   = cd.p1       !== null && cd.p1       !== undefined ? cd.p1       : '';
+    if (p2Col   !== -1) newShRow[p2Col]   = cd.p2       !== null && cd.p2       !== undefined ? cd.p2       : '';
+    if (p3Col   !== -1) newShRow[p3Col]   = cd.p3       !== null && cd.p3       !== undefined ? cd.p3       : '';
+    if (offCol  !== -1) newShRow[offCol]  = cd.official !== null && cd.official !== undefined ? cd.official : '';
+    if (origCol !== -1) newShRow[origCol] = cd.orig === 'N/A' ? '不支持' : (cd.orig !== null && cd.orig !== undefined ? cd.orig : '');
+    sh.appendRow(newShRow);
+  });
+
+  // 寫入所有站點 sheet（不管是否支持都要新增一列）
+  siteConf.forEach(function(site) {
+    var sd = (data.sites && data.sites[site.id]) || {};
+    var sh = ss.getSheetByName(site.sheetName);
+    if (!sh) return;
+    var shRows = sh.getDataRange().getValues();
+    var shHdrs = shRows[0];
+    function sc(n) { return shHdrs.indexOf(n); }
+    var newShRow = new Array(shHdrs.length).fill('');
+    if (sc('id')         !== -1) newShRow[sc('id')]         = newId;
+    if (sc('供應商英文名') !== -1) newShRow[sc('供應商英文名')] = data.en || '';
+    if (sc('供應商中文名') !== -1) newShRow[sc('供應商中文名')] = data.cn || '';
+    if (sc('Category')   !== -1) newShRow[sc('Category')]   = data.cat || '';
+    if (sc('遊戲來源')   !== -1) newShRow[sc('遊戲來源')]   = data.source || '';
+    if (sc('可控')       !== -1) newShRow[sc('可控')]       = data.ctrl || '';
+    if (sc('備註')       !== -1) newShRow[sc('備註')]       = data.note || '';
+    if (sc('game_category') !== -1) newShRow[sc('game_category')] = 'external';
+    if (sc('currency')      !== -1) newShRow[sc('currency')]      = 'usdt';
+    // 費率欄
+    var rateCol    = sc('your_rate') !== -1 ? sc('your_rate') : sc('方案三费率');
+    var enabledCol = sc('預設啟用');
+    var offRateCol = sc('official_rate');
+    if (rateCol    !== -1) newShRow[rateCol]    = sd.r       !== null && sd.r       !== undefined ? sd.r       : '';
+    if (enabledCol !== -1) newShRow[enabledCol] = sd.enabled !== null && sd.enabled !== undefined ? sd.enabled : 'N';
+    // 找對應幣別的官方費率寫入 official_rate 欄
+    if (offRateCol !== -1) {
+      curConfig.forEach(function(cur) {
+        if (cur.siteIds.indexOf(site.id) !== -1) {
+          var cd = (data.currencies && data.currencies[cur.code]) || {};
+          if (cd.official !== null && cd.official !== undefined) {
+            newShRow[offRateCol] = cd.official;
+          }
+        }
+      });
+    }
+    sh.appendRow(newShRow);
+  });
+
+  return { success: true, newId: newId };
+}
+
+// ── deleteProvider ─────────────────────────────────────────
+function deleteProvider(id) {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var curConfig = getCurrencyConfig().currencies;
+  var siteConf  = getSiteConfig();
+
+  // 主表刪除
+  var mainSh = ss.getSheetByName(MAIN_SHEET);
+  var rows   = mainSh.getDataRange().getValues();
+  var idCol  = rows[0].indexOf('id');
+  var rowIdx = -1;
+  for (var i = 1; i < rows.length; i++) {
+    if (parseInt(rows[i][idCol]) === parseInt(id)) { rowIdx = i + 1; break; }
+  }
+  if (rowIdx === -1) throw new Error('Provider not found: ' + id);
+  mainSh.deleteRow(rowIdx);
+
+  // 所有幣別 sheet 刪除
+  curConfig.forEach(function(cur) { _deleteRowFromSheet(cur.sheet, id); });
+
+  // 所有站點 sheet 刪除
+  siteConf.forEach(function(site) { _deleteRowFromSheet(site.sheetName, id); });
+
+  return { success: true };
+}
+
+function _deleteRowFromSheet(sheetName, id) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(sheetName);
+  if (!sh) return;
+  var rows  = sh.getDataRange().getValues();
+  var idCol = rows[0].indexOf('id');
+  if (idCol === -1) return;
+  for (var i = 1; i < rows.length; i++) {
+    if (parseInt(rows[i][idCol]) === parseInt(id)) { sh.deleteRow(i + 1); return; }
   }
 }
 
-function autoFillRates(code){
-  const origEl=document.getElementById('cr_orig_'+code);
-  const orig=parseFloat(origEl.value); // 這是 % 值，如 5 代表 5%
-  if(isNaN(orig))return;
-  const round2=function(v){return Math.round(v*100)/100;};
-  const p1El=document.getElementById('cr_p1_'+code);
-  const p2El=document.getElementById('cr_p2_'+code);
-  const p3El=document.getElementById('cr_p3_'+code);
-  const offEl=document.getElementById('cr_off_'+code);
-  if(p1El&&p1El.value==='')p1El.value=round2(orig+4);
-  if(p2El&&p2El.value==='')p2El.value=round2(orig+4);
-  if(p3El&&p3El.value==='')p3El.value=round2(orig+6);
-  if(offEl&&offEl.value==='')offEl.value=round2(orig+7);
+// ── updateSiteRate ─────────────────────────────────────────
+function updateSiteRate(siteId, providerId, rate, enabled) {
+  var siteConf = getSiteConfig();
+  var site     = siteConf.filter(function(s){ return s.id === siteId; })[0];
+  if (!site) throw new Error('Site not found: ' + siteId);
+  _writeSiteRate(site, providerId, rate, enabled);
+  return { success: true };
 }
 
-function buildSiteBlocks(sitesData){
-  return SITE_ORDER.map(function(sid){
-    const sd=(sitesData&&sitesData[sid])||{r:null,enabled:'Y'};
-    const on=sd.enabled!=='N';
-    const rDisplay=sd.r!==null&&sd.r!==undefined?Math.round(sd.r*10000)/100:'';
-    return `<div class="site-block">
-      <div class="sb-hd">
-        <div class="sb-name">${SITE_NAME[sid]}<span class="sb-id">${sid}</span></div>
-        <div class="sb-tog">預設啟用
-          <div class="tog ${on?'on':''}" id="tgl_${sid}" onclick="toggleSite('${sid}')"><div class="tog-th"></div></div>
-          <span id="tgl_lbl_${sid}" style="font-size:11px;font-weight:500;color:${on?'var(--green)':'var(--t3)'}">${on?'Y':'N'}</span>
-        </div>
-      </div>
-      <div class="sb-body ${on?'':'dim'}" id="sb_body_${sid}">
-        <div class="fgp">
-          <label class="fl">站點費率 your_rate (%)</label>
-          <input class="fi" id="sr_${sid}" type="number" step="0.1" value="${rDisplay}" placeholder="e.g. 9">
-        </div>
-      </div>
-    </div>`;
-  }).join('');
+function _writeSiteRate(site, providerId, rate, enabled, officialRate) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(site.sheetName);
+  if (!sh) return;
+  var rows       = sh.getDataRange().getValues();
+  var hdrs       = rows[0];
+  var idCol      = hdrs.indexOf('id');
+  var rateCol    = hdrs.indexOf('your_rate') !== -1 ? hdrs.indexOf('your_rate') : hdrs.indexOf('方案三费率');
+  var enabledCol = hdrs.indexOf('預設啟用');
+  var offRateCol = hdrs.indexOf('official_rate');
+  var rowIdx = -1;
+  for (var i = 1; i < rows.length; i++) {
+    if (parseInt(rows[i][idCol]) === parseInt(providerId)) { rowIdx = i + 1; break; }
+  }
+  if (rowIdx === -1) return;
+  if (rateCol    !== -1 && rate         !== undefined) sh.getRange(rowIdx, rateCol    + 1).setValue(rate    !== null ? rate    : '');
+  if (enabledCol !== -1 && enabled      !== undefined) sh.getRange(rowIdx, enabledCol + 1).setValue(enabled !== null ? enabled : '');
+  if (offRateCol !== -1 && officialRate !== undefined && officialRate !== null) sh.getRange(rowIdx, offRateCol + 1).setValue(officialRate);
 }
 
-function toggleSite(sid){
-  const t=document.getElementById('tgl_'+sid);
-  const l=document.getElementById('tgl_lbl_'+sid);
-  const b=document.getElementById('sb_body_'+sid);
-  const on=t.classList.toggle('on');
-  l.textContent=on?'Y':'N';l.style.color=on?'var(--green)':'var(--t3)';
-  b.classList.toggle('dim',!on);
-}
-
-function openAdd(){
-  editingId=null;
-  document.getElementById('moTitle').textContent='新增供應商';
-  document.getElementById('moSaveBtn').textContent='新增';
-  ['f_en','f_cn','f_note','f_prov','f_ext','f_cat_icon','f_bal_icon'].forEach(function(i){document.getElementById(i).value='';});
-  document.getElementById('f_cat').value='slots';
-  document.getElementById('f_source').value='ZF one api';
-  document.getElementById('f_ctrl').value='N';
-  document.getElementById('f_enabled').value='N';
-  document.getElementById('curBlocks').innerHTML=buildCurBlocks(null);
-  document.getElementById('siteBlocks').innerHTML=buildSiteBlocks(null);
-  document.getElementById('overlay').style.display='flex';
-}
-
-function openEdit(id){
-  const d=DATA.find(function(x){return x.id===id;});if(!d)return;
-  editingId=id;
-  document.getElementById('moTitle').textContent='編輯 — '+d.en;
-  document.getElementById('moSaveBtn').textContent='儲存所有變更';
-  document.getElementById('f_en').value=d.en||'';
-  document.getElementById('f_cn').value=d.cn||'';
-  document.getElementById('f_cat').value=d.cat||'slots';
-  document.getElementById('f_source').value=d.source||'ZF one api';
-  document.getElementById('f_ctrl').value=d.ctrl||'N';
-  document.getElementById('f_enabled').value=d.enabled||'N';
-  document.getElementById('f_note').value=d.note||'';
-  document.getElementById('f_prov').value=d.prov_code||'';
-  document.getElementById('f_ext').value=d.ext_cat||'';
-  document.getElementById('f_cat_icon').value=d.cat_icon||'';
-  document.getElementById('f_bal_icon').value=d.bal_icon||'';
-  document.getElementById('curBlocks').innerHTML=buildCurBlocks(d.currencies||{});
-  document.getElementById('siteBlocks').innerHTML=buildSiteBlocks(d.sites||{});
-  document.getElementById('overlay').style.display='flex';
-}
-
-function closeMo(){document.getElementById('overlay').style.display='none';}
-
-async function saveMo(){
-  const currencies={};
-  CURRENCIES.forEach(function(cur){
-    const unsup=document.getElementById('unsup_'+cur.code)&&document.getElementById('unsup_'+cur.code).classList.contains('on');
-    if(unsup){currencies[cur.code]={orig:'N/A',p1:null,p2:null,p3:null,official:null};return;}
-    function fv(id){ // 輸入是 %，除以 100 存小數
-      const el=document.getElementById(id);
-      if(!el||el.value==='')return null;
-      return Math.round(parseFloat(el.value)/100*100000)/100000;
+// ── _writeCurrencyRates ────────────────────────────────────
+function _writeCurrencyRates(providerId, currenciesData) {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var curConfig = getCurrencyConfig().currencies;
+  curConfig.forEach(function(cur) {
+    var cd = currenciesData[cur.code];
+    if (!cd) return;
+    var sh = ss.getSheetByName(cur.sheet);
+    if (!sh) return;
+    var rows  = sh.getDataRange().getValues();
+    var hdrs  = rows[0];
+    var idCol = hdrs.indexOf('id');
+    if (idCol === -1) return;
+    var p1Col  = hdrs.indexOf('方案一費率') !== -1 ? hdrs.indexOf('方案一費率') : hdrs.indexOf('方案一费率');
+    var p2Col  = hdrs.indexOf('方案二費率') !== -1 ? hdrs.indexOf('方案二費率') : hdrs.indexOf('方案二费率');
+    var p3Col  = hdrs.indexOf('方案三費率') !== -1 ? hdrs.indexOf('方案三費率') : hdrs.indexOf('方案三费率');
+    var offCol = hdrs.indexOf('官方費率(init)') !== -1 ? hdrs.indexOf('官方費率(init)') : hdrs.indexOf('官方费率');
+    var origCol = hdrs.indexOf(cur.origCol);
+    var rowIdx = -1;
+    for (var i = 1; i < rows.length; i++) {
+      if (parseInt(rows[i][idCol]) === parseInt(providerId)) { rowIdx = i + 1; break; }
     }
-    currencies[cur.code]={
-      orig:     fv('cr_orig_'+cur.code),
-      p1:       fv('cr_p1_'+cur.code),
-      p2:       fv('cr_p2_'+cur.code),
-      p3:       fv('cr_p3_'+cur.code),
-      official: fv('cr_off_'+cur.code),
-    };
+    if (rowIdx === -1) return;
+    function sv(col, val) {
+      if (col !== -1) sh.getRange(rowIdx, col + 1).setValue(val !== null && val !== undefined ? val : '');
+    }
+    sv(p1Col,   cd.p1);
+    sv(p2Col,   cd.p2);
+    sv(p3Col,   cd.p3);
+    sv(offCol,  cd.official);
+    if (origCol !== -1) sh.getRange(rowIdx, origCol + 1).setValue(
+      cd.orig === 'N/A' ? '不支持' : (cd.orig !== null && cd.orig !== undefined ? cd.orig : '')
+    );
   });
-  const sites={};
-  SITE_ORDER.forEach(function(sid){
-    const rEl=document.getElementById('sr_'+sid);
-    const on=document.getElementById('tgl_'+sid)&&document.getElementById('tgl_'+sid).classList.contains('on');
-    const rVal=rEl&&rEl.value!==''?Math.round(parseFloat(rEl.value)/100*100000)/100000:null;
-    sites[sid]={r:rVal,enabled:on?'Y':'N'};
-  });
-  const payload={
-    en:document.getElementById('f_en').value.trim(),
-    cn:document.getElementById('f_cn').value.trim(),
-    cat:document.getElementById('f_cat').value,
-    source:document.getElementById('f_source').value,
-    ctrl:document.getElementById('f_ctrl').value,
-    enabled:document.getElementById('f_enabled').value,
-    note:document.getElementById('f_note').value.trim(),
-    prov_code:document.getElementById('f_prov').value.trim(),
-    ext_cat:document.getElementById('f_ext').value.trim(),
-    cat_icon:document.getElementById('f_cat_icon').value.trim(),
-    bal_icon:document.getElementById('f_bal_icon').value.trim(),
-    currencies:currencies,
-    sites:sites,
-  };
-  const btn=document.getElementById('moSaveBtn');
-  btn.textContent='儲存中…';btn.disabled=true;
-  try{
-    const res=await apiPost(editingId!==null?{action:'updateProvider',data:Object.assign({id:editingId},payload)}:{action:'addProvider',data:payload});
-    if(res.error){toast('錯誤：'+res.error,true);return;}
-    closeMo();toast(editingId!==null?'已儲存 ✓':'已新增 ✓');
-    await loadAll();
-  }catch(e){toast('連線錯誤：'+e.message,true);}
-  finally{btn.textContent=editingId!==null?'儲存所有變更':'新增';btn.disabled=false;}
 }
-
-async function delRow(id,name){
-  if(!confirm('確定刪除「'+name+'」？'))return;
-  try{
-    const res=await apiPost({action:'deleteProvider',id:id});
-    if(res.error){toast('錯誤：'+res.error,true);return;}
-    toast('已刪除 ✓');await loadAll();
-  }catch(e){toast('連線錯誤：'+e.message,true);}
-}
-
-function toast(msg,isErr){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast show'+(isErr?' err':'');
-  setTimeout(function(){t.className='toast';},3000);
-}
-</script>
-</body>
-</html>
