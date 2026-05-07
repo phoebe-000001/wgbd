@@ -125,7 +125,7 @@ thead th{background:var(--sur2);color:var(--t2);font-weight:500;font-size:11px;t
 thead th:hover{color:var(--t);}
 thead th.sorted{color:var(--t);}
 thead th.r{text-align:right;}
-thead th.orig-h{text-align:right;color:var(--t3)!important;}
+thead th.orig-h{text-align:right;color:var(--t3);font-weight:400;}
 /* Sticky first column */
 th.sticky-col,td.sticky-col{position:sticky;left:0;z-index:5;background:var(--sur);}
 thead th.sticky-col{z-index:15;background:var(--sur2);}
@@ -239,6 +239,11 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>贏界 Wingea · 遊戲抽點表</div>
+  <div class="view-mode-tabs" style="margin-left:24px;">
+    <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
+    <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
+    <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
+  </div>
   <div class="hdr-right">
     <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
     <div id="userInfo"></div>
@@ -306,11 +311,6 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
       <div class="factions">
         <button class="btn btn-gho" onclick="clearAll()">清除篩選</button>
         <button class="btn btn-pri" onclick="openAdd()">＋ 新增供應商</button>
-        <div class="view-mode-tabs">
-          <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
-          <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
-          <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
-        </div>
       </div>
     </div>
   </div>
@@ -328,7 +328,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 </div>
 
 <!-- Modal -->
-<div class="overlay" id="overlay" style="display:none" onclick="if(event.target===this)closeMo()">
+<div class="overlay" id="overlay" style="display:none">
 <div class="modal">
   <div class="mo-hd"><span class="mo-title" id="moTitle">新增供應商</span><button class="mo-x" onclick="closeMo()">✕</button></div>
   <div class="mo-body">
@@ -581,13 +581,18 @@ function updateBadge(type){const n=ddSel[type].size;const b=document.getElementB
 function updateSelStrip(){
   const strip=document.getElementById('selStripRow');
   const tags=[];
-  [{k:'cat',opts:CAT_OPTS},{k:'src',opts:DD_CFG.src.opts},{k:'site',opts:SITE_OPTS}].forEach(function(cfg){
+  [{k:'cat',opts:CAT_OPTS},{k:'src',opts:DD_CFG.src.opts},{k:'site',opts:DD_CFG.site.opts}].forEach(function(cfg){
     ddSel[cfg.k].forEach(function(v){const o=cfg.opts.find(function(x){return x.v===v;});const lbl=o?o.l:v;tags.push(`<span class="sel-tag">${lbl}<span class="rm" onclick="toggleDDOpt('${cfg.k}','${v}')"> ×</span></span>`);});
   });
   strip.innerHTML=tags.join('');
   strip.style.display=tags.length?'flex':'none';
 }
-function clearAll(){['cat','src','site'].forEach(function(t){ddSel[t].clear();updateBadge(t);});updateSelStrip();document.getElementById('q').value='';render();}
+function clearAll(){
+  ['cat','src','site'].forEach(function(t){ddSel[t].clear();updateBadge(t);});
+  updateSelStrip();
+  document.getElementById('q').value='';
+  render();
+}
 document.addEventListener('click',function(e){if(!e.target.closest('.dd')){Object.keys(ddOpen).forEach(function(k){if(ddOpen[k]){ddOpen[k]=false;document.getElementById('dd_'+k+'_menu').style.display='none';document.getElementById('dd_'+k+'_btn').classList.remove('open');}});}});
 
 // ── Filter & Sort ─────────────────────────────────────
