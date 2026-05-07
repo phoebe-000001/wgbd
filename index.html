@@ -35,8 +35,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t);min-height:100v
 .sync-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .user-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);}
-.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+.user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;margin:2px;}
 .btn-signout{height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+#userInfo{display:flex;align-items:center;gap:6px;}
 
 /* Layout */
 .page{max-width:1700px;margin:0 auto;padding:16px 24px;}
@@ -303,11 +305,11 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
     <div class="fcontent">
       <label class="ck"><input type="checkbox" id="ck_src" checked onchange="render()"> 遊戲來源</label>
       <label class="ck"><input type="checkbox" id="ck_prov" onchange="render()"> provider_code</label>
-      <label class="ck"><input type="checkbox" id="ck_ctrl" checked onchange="render()"> 可控</label>
-      <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 全域啟用</label>
+      <label class="ck"><input type="checkbox" id="ck_ctrl" onchange="render()"> 可控</label>
+      <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 預設啟用</label>
       <label class="ck"><input type="checkbox" id="ck_cat_icon" onchange="render()"> category_icon</label>
       <label class="ck"><input type="checkbox" id="ck_bal_icon" onchange="render()"> balance_icon</label>
-      <label class="ck"><input type="checkbox" id="ck_ext" onchange="render()"> ext_category_code</label>
+      <label class="ck"><input type="checkbox" id="ck_ext" onchange="render()"> external_category_code</label>
       <div class="factions">
         <button class="btn btn-gho" onclick="clearAll()">清除篩選</button>
         <button class="btn btn-pri" onclick="openAdd()">＋ 新增供應商</button>
@@ -656,7 +658,7 @@ function baseHead(){
   if(ck('ck_prov'))h+='<th>provider_code</th>';
   if(ck('ck_ext')) h+='<th>ext_category_code</th>';
   if(ck('ck_ctrl'))h+='<th style="text-align:center">可控</th>';
-  if(ck('ck_enabled'))h+='<th style="text-align:center">全域啟用</th>';
+  if(ck('ck_enabled'))h+='<th style="text-align:center">預設啟用</th>';
   return h;
 }
 
@@ -682,10 +684,10 @@ function renderCurrencyTable(data){
   let head='<tr>'+baseHead();
   if(isCompare){
     showCurs.forEach(function(cur){
-      head+=`<th colspan="5" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
+      head+=`<th colspan="6" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
     });
   } else {
-    head+='<th class="r">原始費率</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th>';
+    head+='<th class="r">原始費率</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th><th style="text-align:center">預設啟用</th>';
   }
   head+='<th style="text-align:center">操作</th></tr>';
 
@@ -700,7 +702,7 @@ function renderCurrencyTable(data){
     if(ck('ck_ctrl'))head+='<th></th>';
     if(ck('ck_enabled'))head+='<th></th>';
     showCurs.forEach(function(){
-      head+='<th class="r" style="border-left:2px solid #c7d2fe">原始</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th>';
+      head+='<th class="r" style="border-left:2px solid #c7d2fe">原始</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th><th style="text-align:center">啟用</th>';
     });
     head+='<th></th></tr>';
   }
@@ -716,6 +718,7 @@ function renderCurrencyTable(data){
         r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
         r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
         r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+        r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
       });
     } else {
       const cur=showCurs[0];
@@ -725,6 +728,7 @@ function renderCurrencyTable(data){
       r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
       r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+      r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
     }
     r+=`<td class="td-ctr"><div class="abtns">
       <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
@@ -831,6 +835,11 @@ function editSiteRate(id,siteId,curRate,curEnabled){
 }
 
 // ── Modal ─────────────────────────────────────────────
+function pctVal(v){ // 把存的小數轉成百分比顯示，如 0.05 → 5
+  if(v===null||v===undefined||v==='N/A')return '';
+  return Math.round(v*10000)/100; // 保留2位
+}
+
 function buildCurBlocks(currenciesData){
   return CURRENCIES.map(function(cur){
     const cd=(currenciesData&&currenciesData[cur.code])||{};
@@ -845,24 +854,24 @@ function buildCurBlocks(currenciesData){
       </div>
       <div class="cb-body ${isUnsup?'dim':''}" id="cb_body_${cur.code}">
         <div class="fgp">
-          <label class="fl">原始費率</label>
-          <input class="fi" id="cr_orig_${cur.code}" type="number" step="0.001" value="${cd.orig&&cd.orig!=='N/A'?cd.orig:''}" placeholder="0.05" oninput="autoFillRates('${cur.code}')">
+          <label class="fl">原始費率 (%)</label>
+          <input class="fi" id="cr_orig_${cur.code}" type="number" step="0.1" value="${pctVal(cd.orig)}" placeholder="5" oninput="autoFillRates('${cur.code}')">
         </div>
         <div class="fgp">
           <label class="fl">方案一 (+4%)</label>
-          <input class="fi" id="cr_p1_${cur.code}" type="number" step="0.001" value="${cd.p1!==null&&cd.p1!==undefined?cd.p1:''}" placeholder="自動">
+          <input class="fi" id="cr_p1_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p1)}" placeholder="自動">
         </div>
         <div class="fgp">
           <label class="fl">方案二 (+4%)</label>
-          <input class="fi" id="cr_p2_${cur.code}" type="number" step="0.001" value="${cd.p2!==null&&cd.p2!==undefined?cd.p2:''}" placeholder="自動">
+          <input class="fi" id="cr_p2_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p2)}" placeholder="自動">
         </div>
         <div class="fgp">
           <label class="fl">方案三 (+6%)</label>
-          <input class="fi" id="cr_p3_${cur.code}" type="number" step="0.001" value="${cd.p3!==null&&cd.p3!==undefined?cd.p3:''}" placeholder="自動">
+          <input class="fi" id="cr_p3_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p3)}" placeholder="自動">
         </div>
         <div class="fgp">
           <label class="fl">官方費率 (+7%)</label>
-          <input class="fi" id="cr_off_${cur.code}" type="number" step="0.001" value="${cd.official!==null&&cd.official!==undefined?cd.official:''}" placeholder="自動">
+          <input class="fi" id="cr_off_${cur.code}" type="number" step="0.1" value="${pctVal(cd.official)}" placeholder="自動">
         </div>
       </div>
     </div>`;
@@ -889,23 +898,24 @@ function toggleUnsup(code){
 
 function autoFillRates(code){
   const origEl=document.getElementById('cr_orig_'+code);
-  const orig=parseFloat(origEl.value);
+  const orig=parseFloat(origEl.value); // 這是 % 值，如 5 代表 5%
   if(isNaN(orig))return;
-  const round5=function(v){return Math.round(v*100000)/100000;};
+  const round2=function(v){return Math.round(v*100)/100;};
   const p1El=document.getElementById('cr_p1_'+code);
   const p2El=document.getElementById('cr_p2_'+code);
   const p3El=document.getElementById('cr_p3_'+code);
   const offEl=document.getElementById('cr_off_'+code);
-  if(p1El&&p1El.value==='')p1El.value=round5(orig+0.04);
-  if(p2El&&p2El.value==='')p2El.value=round5(orig+0.04);
-  if(p3El&&p3El.value==='')p3El.value=round5(orig+0.06);
-  if(offEl&&offEl.value==='')offEl.value=round5(orig+0.07);
+  if(p1El&&p1El.value==='')p1El.value=round2(orig+4);
+  if(p2El&&p2El.value==='')p2El.value=round2(orig+4);
+  if(p3El&&p3El.value==='')p3El.value=round2(orig+6);
+  if(offEl&&offEl.value==='')offEl.value=round2(orig+7);
 }
 
 function buildSiteBlocks(sitesData){
   return SITE_ORDER.map(function(sid){
     const sd=(sitesData&&sitesData[sid])||{r:null,enabled:'Y'};
     const on=sd.enabled!=='N';
+    const rDisplay=sd.r!==null&&sd.r!==undefined?Math.round(sd.r*10000)/100:'';
     return `<div class="site-block">
       <div class="sb-hd">
         <div class="sb-name">${SITE_NAME[sid]}<span class="sb-id">${sid}</span></div>
@@ -916,8 +926,8 @@ function buildSiteBlocks(sitesData){
       </div>
       <div class="sb-body ${on?'':'dim'}" id="sb_body_${sid}">
         <div class="fgp">
-          <label class="fl">站點費率 (your_rate)</label>
-          <input class="fi" id="sr_${sid}" type="number" step="0.001" value="${sd.r!==null&&sd.r!==undefined?sd.r:''}" placeholder="e.g. 0.09">
+          <label class="fl">站點費率 your_rate (%)</label>
+          <input class="fi" id="sr_${sid}" type="number" step="0.1" value="${rDisplay}" placeholder="e.g. 9">
         </div>
       </div>
     </div>`;
@@ -975,7 +985,11 @@ async function saveMo(){
   CURRENCIES.forEach(function(cur){
     const unsup=document.getElementById('unsup_'+cur.code)&&document.getElementById('unsup_'+cur.code).classList.contains('on');
     if(unsup){currencies[cur.code]={orig:'N/A',p1:null,p2:null,p3:null,official:null};return;}
-    function fv(id){const el=document.getElementById(id);return el&&el.value!==''?parseFloat(el.value):null;}
+    function fv(id){ // 輸入是 %，除以 100 存小數
+      const el=document.getElementById(id);
+      if(!el||el.value==='')return null;
+      return Math.round(parseFloat(el.value)/100*100000)/100000;
+    }
     currencies[cur.code]={
       orig:     fv('cr_orig_'+cur.code),
       p1:       fv('cr_p1_'+cur.code),
@@ -988,7 +1002,8 @@ async function saveMo(){
   SITE_ORDER.forEach(function(sid){
     const rEl=document.getElementById('sr_'+sid);
     const on=document.getElementById('tgl_'+sid)&&document.getElementById('tgl_'+sid).classList.contains('on');
-    sites[sid]={r:rEl&&rEl.value!==''?parseFloat(rEl.value):null,enabled:on?'Y':'N'};
+    const rVal=rEl&&rEl.value!==''?Math.round(parseFloat(rEl.value)/100*100000)/100000:null;
+    sites[sid]={r:rVal,enabled:on?'Y':'N'};
   });
   const payload={
     en:document.getElementById('f_en').value.trim(),
