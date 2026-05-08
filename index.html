@@ -238,6 +238,20 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--t);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.err{background:var(--red);}
+
+/* ── Guest mode ── */
+.guest-banner{background:#fef3c7;border-bottom:1px solid #fcd34d;padding:8px 28px;font-size:12px;color:#92400e;display:flex;align-items:center;gap:8px;}
+.guest-banner strong{font-weight:600;}
+body.guest-mode .filter-bar .frow:nth-child(3),
+body.guest-mode .filter-bar .frow:nth-child(4),
+body.guest-mode .filter-bar .frow:nth-child(5){display:none;}
+body.guest-mode #vm_site,
+body.guest-mode #vm_overview{display:none;}
+body.guest-mode .btn-pri,
+body.guest-mode .btn-dan,
+body.guest-mode .abtns{display:none;}
+body.guest-mode .rc-click{cursor:default;pointer-events:none;}
+body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 </style>
 </head>
 <body>
@@ -266,6 +280,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
   </div>
 </header>
 
+<div id="guestBanner" class="guest-banner" style="display:none">👁 <strong>遊客模式</strong> · 僅供查閱，如需完整功能請使用 wingea.vip 帳號登入</div>
 <div class="page">
 <div class="filter-bar">
   <!-- Row 1: 篩選條件 grid -->
@@ -337,7 +352,7 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
   <!-- Row 3: 顯示欄位 + 操作 -->
   <div class="frow" style="min-height:0;flex-wrap:wrap;gap:8px;">
     <span class="flbl" style="width:auto;border:none;padding:0">顯示欄位</span>
-    <label class="ck"><input type="checkbox" id="ck_src" checked onchange="render()"> 遊戲來源</label>
+    <label class="ck"><input type="checkbox" id="ck_src" onchange="render()"> 遊戲來源</label>
     <label class="ck"><input type="checkbox" id="ck_ctrl" onchange="render()"> 可控</label>
     <label class="ck"><input type="checkbox" id="ck_enabled" onchange="render()"> 預設啟用</label>
     <label class="ck"><input type="checkbox" id="ck_cat_icon" onchange="render()"> category_icon</label>
@@ -447,6 +462,30 @@ const ddSel={cat:new Set(),src:new Set(),site:new Set()};
 const ddOpen={cat:false,src:false,site:false};
 
 // ── Auth ──────────────────────────────────────────────
+let isGuest = false;
+
+function enterGuestMode(){
+  isGuest = true;
+  document.body.classList.add('guest-mode');
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('guestBanner').style.display='flex';
+  document.getElementById('userInfo').innerHTML=
+    '<button class="btn-signout" onclick="exitGuestMode()">登入</button>';
+  // Force currency view
+  switchViewMode('currency');
+  document.getElementById('vm_site').style.display='none';
+  document.getElementById('vm_overview').style.display='none';
+  loadAll();
+}
+
+function exitGuestMode(){
+  isGuest = false;
+  document.body.classList.remove('guest-mode');
+  document.getElementById('guestBanner').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('userInfo').innerHTML='';
+}
+
 function initAuth(){
   // Check stored token
   const exp = parseInt(localStorage.getItem(TOKEN_EXP_KEY)||'0');
@@ -457,9 +496,14 @@ function initAuth(){
     loadAll();
     return;
   }
-  // Show Google sign-in
+  // Show Google sign-in + guest entry button
   google.accounts.id.initialize({client_id:'1031858151521-k4a6p25nd81oiuio7id9d9p5odacgqdr.apps.googleusercontent.com',callback:handleCredential,auto_select:true});
   google.accounts.id.renderButton(document.getElementById('g_id_signin'),{theme:'outline',size:'large',text:'signin_with',locale:'zh-TW',width:280});
+  // Add guest button below sign-in
+  const guestBtn = document.createElement('div');
+  guestBtn.style.cssText='margin-top:12px;';
+  guestBtn.innerHTML='<button onclick="enterGuestMode()" style="width:280px;height:40px;border:1px solid var(--bdr);border-radius:8px;background:transparent;color:var(--t2);font-size:13px;font-family:var(--sans);cursor:pointer;">👁 以遊客身分瀏覽</button>';
+  document.getElementById('g_id_signin').appendChild(guestBtn);
   google.accounts.id.prompt();
 }
 
@@ -734,10 +778,10 @@ function renderCurrencyTable(data){
   let head='<tr>'+baseHead();
   if(isCompare){
     showCurs.forEach(function(cur){
-      head+=`<th colspan="6" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
+      head+=`<th colspan="${isGuest?4:6}" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
     });
   } else {
-    head+='<th class="r">原始費率</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th><th style="text-align:center">預設啟用</th>';
+    head+=(isGuest?'':'<th class="r">原始費率</th>')+'<th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th>'+(isGuest?'':'<th class="orig-h">官方費率</th>')+'<th style="text-align:center">預設啟用</th>';
   }
   head+='<th style="text-align:center">操作</th></tr>';
 
@@ -752,7 +796,7 @@ function renderCurrencyTable(data){
     if(ck('ck_ctrl'))head+='<th></th>';
     if(ck('ck_enabled'))head+='<th></th>';
     showCurs.forEach(function(){
-      head+='<th class="r" style="border-left:2px solid #c7d2fe">原始</th><th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th><th style="text-align:center">啟用</th>';
+      head+=(isGuest?'':'<th class="r" style="border-left:2px solid #c7d2fe">原始</th>')+'<th class="r"'+(isGuest?' style="border-left:2px solid #c7d2fe"':'')+'>方案一</th><th class="r">方案二</th><th class="r">方案三</th>'+(isGuest?'':'<th class="orig-h">官方</th>')+'<th style="text-align:center">啟用</th>';
     });
     head+='<th></th></tr>';
   }
@@ -763,21 +807,21 @@ function renderCurrencyTable(data){
       showCurs.forEach(function(cur,ci){
         const cd=(d.currencies&&d.currencies[cur.code])||{};
         const borderStyle=ci===0?'border-left:2px solid #c7d2fe':'';
-        r+=`<td class="td-rc" style="${borderStyle}">${fmtRate(cd.orig)}</td>`;
-        r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
+        if(!isGuest)r+=`<td class="td-rc" style="${borderStyle}">${fmtRate(cd.orig)}</td>`;
+        r+=`<td class="td-rc" style="${isGuest?borderStyle:''}">${fmtRate(cd.p1)}</td>`;
         r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
         r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-        r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+        if(!isGuest)r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
         r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
       });
     } else {
       const cur=showCurs[0];
       const cd=(d.currencies&&d.currencies[cur.code])||{};
-      r+=`<td class="td-rc">${fmtRate(cd.orig)}</td>`;
+      if(!isGuest)r+=`<td class="td-rc">${fmtRate(cd.orig)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-      r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+      if(!isGuest)r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
       r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
     }
     r+=`<td class="td-ctr"><div class="abtns">
