@@ -144,8 +144,12 @@ thead th.sticky-col{z-index:15;background:var(--sur2);}
 tbody tr:hover td.sticky-col{background:var(--sur2);}
 .sarr{font-size:9px;margin-left:2px;opacity:.4;}
 thead th.sorted .sarr{opacity:1;}
-/* Cur group header */
-thead tr.cur-hdr th{background:#f0f3ff;font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;padding:4px 10px;border-bottom:none;}
+/* Cur group header (first row in compare mode) - sits at top:0 */
+thead tr.cur-hdr th{background:#f0f3ff;font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;padding:5px 10px;border-bottom:none;position:sticky;top:0;z-index:10;}
+thead tr.cur-hdr th.sticky-col{z-index:15;}
+/* Second header row in compare mode - sits below cur-hdr row (28px height) */
+thead tr.col-hdr th{position:sticky;top:28px;z-index:10;background:var(--sur2);border-top:1px solid var(--bdr);}
+thead tr.col-hdr th.sticky-col{z-index:15;}
 tbody tr{border-bottom:1px solid var(--bdr);}
 tbody tr:last-child{border-bottom:none;}
 tbody tr:hover{background:var(--sur2);}
@@ -735,7 +739,7 @@ function renderCurrencyTable(data){
 
   if(isCompare){
     // second header row for sub-columns
-    head+='<tr class="cur-hdr"><th class="sticky-col"></th><th></th>';
+    head+='<tr class="col-hdr"><th class="sticky-col"></th><th></th>';
     if(ck('ck_src'))head+='<th></th>';
     if(ck('ck_cat_icon'))head+='<th></th>';
     if(ck('ck_bal_icon'))head+='<th></th>';
@@ -1078,17 +1082,25 @@ async function saveMo(){
 
 async function delRow(id,name){
   if(!confirm('確定刪除「'+name+'」？'))return;
+  // 找到並鎖定刪除按鈕
+  const btns=document.querySelectorAll('.btn-dan.btn-sm');
+  btns.forEach(function(b){b.disabled=true;});
+  toast('刪除中…',false,true);
   try{
     const res=await apiPost({action:'deleteProvider',id:id});
-    if(res.error){toast('錯誤：'+res.error,true);return;}
-    toast('已刪除 ✓');await loadAll();
-  }catch(e){toast('連線錯誤：'+e.message,true);}
+    if(res.error){toast('錯誤：'+res.error,true);btns.forEach(function(b){b.disabled=false;});return;}
+    toast('已刪除 ✓');
+    await loadAll();
+  }catch(e){
+    toast('連線錯誤：'+e.message,true);
+    btns.forEach(function(b){b.disabled=false;});
+  }
 }
 
-function toast(msg,isErr){
+function toast(msg,isErr,persist){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast show'+(isErr?' err':'');
-  setTimeout(function(){t.className='toast';},3000);
+  if(!persist)setTimeout(function(){t.className='toast';},3000);
 }
 </script>
 </body>
