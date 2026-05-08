@@ -514,14 +514,14 @@ async function apiPost(b){
   return r.json();
 }
 
-async function loadAll(){
+async function loadAll(silent){
   try{
-    document.getElementById('syncLabel').textContent='載入中…';
+    if(!silent)document.getElementById('syncLabel').textContent='載入中…';
     const [pRes,sRes,cRes]=await Promise.all([apiGet('getAll'),apiGet('getSites'),apiGet('getCurrencies')]);
+    if(pRes.error||sRes.error||cRes.error) throw new Error(pRes.error||sRes.error||cRes.error);
     DATA=pRes.providers||[];
     SITE_INFO=sRes.sites||[];
     CURRENCIES=cRes.currencies||[];
-    // 從站點資料動態建立 SITE_ORDER / SITE_LABEL / SITE_NAME / DD_CFG.site.opts
     SITE_ORDER=SITE_INFO.map(function(s){return s.id;});
     SITE_LABEL={};SITE_NAME={};
     SITE_INFO.forEach(function(s){
@@ -529,15 +529,19 @@ async function loadAll(){
       SITE_NAME[s.id]=s.name;
     });
     DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
-    // Set default active currency
     if(CURRENCIES.length&&!activeCur) activeCur=CURRENCIES[0].code;
     buildCurBar();
     buildDDFromData();
     document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
     render();
   }catch(e){
-    document.getElementById('mainContent').innerHTML=`<div class="state"><div style="font-size:28px;margin-bottom:10px">⚠</div><div style="color:var(--red);margin-bottom:6px">無法連線</div><div style="font-size:12px;color:var(--t3)">${e.message}</div></div>`;
     document.getElementById('syncLabel').textContent='連線失敗';
+    if(!silent&&!DATA.length){
+      document.getElementById('mainContent').innerHTML=`<div class="state"><div style="font-size:28px;margin-bottom:10px">⚠</div><div style="color:var(--red);margin-bottom:6px">無法連線</div><div style="font-size:12px;color:var(--t3)">${e.message}</div></div>`;
+    } else {
+      toast('刷新失敗：'+e.message,true);
+    }
+    throw e;
   }
 }
 
@@ -1074,23 +1078,27 @@ async function saveMo(){
   try{
     const res=await apiPost(editingId!==null?{action:'updateProvider',data:Object.assign({id:editingId},payload)}:{action:'addProvider',data:payload});
     if(res.error){toast('錯誤：'+res.error,true);return;}
-    closeMo();toast(editingId!==null?'已儲存 ✓':'已新增 ✓');
+    closeMo();toast('儲存中，刷新列表…',false,true);
+    await new Promise(function(r){setTimeout(r,1500);});
     await loadAll();
+    toast(editingId!==null?'已儲存 ✓':'已新增 ✓');
   }catch(e){toast('連線錯誤：'+e.message,true);}
   finally{btn.textContent=editingId!==null?'儲存所有變更':'新增';btn.disabled=false;}
 }
 
 async function delRow(id,name){
   if(!confirm('確定刪除「'+name+'」？'))return;
-  // 找到並鎖定刪除按鈕
   const btns=document.querySelectorAll('.btn-dan.btn-sm');
   btns.forEach(function(b){b.disabled=true;});
   toast('刪除中…',false,true);
   try{
     const res=await apiPost({action:'deleteProvider',id:id});
     if(res.error){toast('錯誤：'+res.error,true);btns.forEach(function(b){b.disabled=false;});return;}
-    toast('已刪除 ✓');
+    toast('已刪除，刷新列表中…',false,true);
+    // 等 1.5 秒讓 Apps Script 處理完再刷新
+    await new Promise(function(r){setTimeout(r,1500);});
     await loadAll();
+    toast('已刪除 ✓');
   }catch(e){
     toast('連線錯誤：'+e.message,true);
     btns.forEach(function(b){b.disabled=false;});
