@@ -958,10 +958,11 @@ function autoFillRates(code){
   const p2El=document.getElementById('cr_p2_'+code);
   const p3El=document.getElementById('cr_p3_'+code);
   const offEl=document.getElementById('cr_off_'+code);
-  if(p1El&&p1El.value==='')p1El.value=round2(orig+4);
-  if(p2El&&p2El.value==='')p2El.value=round2(orig+4);
-  if(p3El&&p3El.value==='')p3El.value=round2(orig+6);
-  if(offEl&&offEl.value==='')offEl.value=round2(orig+7);
+  // 直接覆蓋，不管有沒有值（讓使用者清楚感覺到數字有跟著變）
+  if(p1El)p1El.value=round2(orig+4);
+  if(p2El)p2El.value=round2(orig+4);
+  if(p3El)p3El.value=round2(orig+6);
+  if(offEl)offEl.value=round2(orig+7);
 }
 
 function buildSiteBlocks(sitesData){
