@@ -280,7 +280,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
   </div>
 </header>
 
-<div id="guestBanner" class="guest-banner" style="display:none">👁 <strong>遊客模式</strong> · 僅供查閱，如需完整功能請使用 wingea.vip 帳號登入</div>
+<div id="guestBanner" class="guest-banner" style="display:none">👁 <strong>遊客模式</strong> · 僅供查閱，如對費率有疑問，請洽對接商務</div>
 <div class="page">
 <div class="filter-bar">
   <!-- Row 1: 篩選條件 grid -->
@@ -781,7 +781,7 @@ function renderCurrencyTable(data){
       head+=`<th colspan="${isGuest?4:6}" style="text-align:center;background:#f0f3ff;color:var(--accent);border-left:2px solid #c7d2fe">${cur.label}</th>`;
     });
   } else {
-    head+=(isGuest?'':'<th class="r">原始費率</th>')+'<th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th>'+(isGuest?'':'<th class="orig-h">官方費率</th>')+'<th style="text-align:center">預設啟用</th>';
+    head+=(isGuest?'':'<th class="r">原始費率</th>')+'<th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th>'+(isGuest?'':'<th style="text-align:center">預設啟用</th>');
   }
   head+='<th style="text-align:center">操作</th></tr>';
 
@@ -796,7 +796,7 @@ function renderCurrencyTable(data){
     if(ck('ck_ctrl'))head+='<th></th>';
     if(ck('ck_enabled'))head+='<th></th>';
     showCurs.forEach(function(){
-      head+=(isGuest?'':'<th class="r" style="border-left:2px solid #c7d2fe">原始</th>')+'<th class="r"'+(isGuest?' style="border-left:2px solid #c7d2fe"':'')+'>方案一</th><th class="r">方案二</th><th class="r">方案三</th>'+(isGuest?'':'<th class="orig-h">官方</th>')+'<th style="text-align:center">啟用</th>';
+      head+=(isGuest?'':'<th class="r" style="border-left:2px solid #c7d2fe">原始</th>')+'<th class="r"'+(isGuest?' style="border-left:2px solid #c7d2fe"':'')+'>方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th>'+(isGuest?'':'<th style="text-align:center">啟用</th>');
     });
     head+='<th></th></tr>';
   }
@@ -811,8 +811,8 @@ function renderCurrencyTable(data){
         r+=`<td class="td-rc" style="${isGuest?borderStyle:''}">${fmtRate(cd.p1)}</td>`;
         r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
         r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-        if(!isGuest)r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
-        r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
+        r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+        if(!isGuest)r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
       });
     } else {
       const cur=showCurs[0];
@@ -821,8 +821,8 @@ function renderCurrencyTable(data){
       r+=`<td class="td-rc">${fmtRate(cd.p1)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p2)}</td>`;
       r+=`<td class="td-rc">${fmtRate(cd.p3)}</td>`;
-      if(!isGuest)r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
-      r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
+      r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
+      if(!isGuest)r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
     }
     r+=`<td class="td-ctr"><div class="abtns">
       <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
