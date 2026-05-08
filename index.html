@@ -503,10 +503,10 @@ function waitForGoogle(){
 waitForGoogle();
 
 // ── API ──────────────────────────────────────────────
-async function apiGet(a){const r=await fetch(`${API_URL}?action=${a}`);return r.json();}
+async function apiGet(a){const r=await fetch(`${API_URL}?action=${a}&_t=${Date.now()}`);return r.json();}
 async function apiPost(b){
   const encoded=encodeURIComponent(JSON.stringify(b));
-  const r=await fetch(`${API_URL}?payload=${encoded}`);
+  const r=await fetch(`${API_URL}?payload=${encoded}&_t=${Date.now()}`);
   return r.json();
 }
 
