@@ -115,13 +115,11 @@ input[type=text]:focus{border-color:var(--accent);background:#fff;}
 .vm-tab.on{background:var(--sur);color:var(--t);box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
 /* Currency tabs */
-.cur-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-.cur-tab{height:28px;padding:0 12px;font-size:11px;font-family:var(--mono);font-weight:500;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);color:var(--t2);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:6px;}
-.cur-tab:hover{border-color:var(--bdr2);color:var(--t);}
-.cur-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-.cur-tab.pinned{background:var(--abg);color:var(--accent);border-color:var(--accent);}
-.cur-pin-btn{font-size:10px;opacity:.7;cursor:pointer;}
-.cur-pin-btn:hover{opacity:1;}
+.cur-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.cur-ck{display:flex;align-items:center;gap:5px;height:28px;padding:0 10px;border:1px solid var(--bdr);border-radius:6px;background:var(--sur2);cursor:pointer;user-select:none;transition:all .12s;font-size:11px;font-family:var(--mono);font-weight:500;color:var(--t2);}
+.cur-ck:hover{border-color:var(--bdr2);color:var(--t);}
+.cur-ck.checked{background:var(--abg);border-color:var(--accent);color:var(--accent);}
+.cur-ck input[type=checkbox]{accent-color:var(--accent);width:12px;height:12px;cursor:pointer;}
 .compare-hint{font-size:11px;color:var(--t3);margin-left:4px;}
 
 /* State */
@@ -456,8 +454,7 @@ const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:[]}};
 
 let DATA=[], SITE_INFO=[], CURRENCIES=[];
 let viewMode='currency'; // 'currency' | 'site_rate' | 'site_overview'
-let activeCur=''; // active single currency tab
-let pinnedCurs=new Set(); // pinned currencies for comparison
+let selectedCurs=new Set(); // selected currencies (checkbox)
 let sortK=null, sortD=1, editingId=null;
 const ddSel={cat:new Set(),src:new Set(),site:new Set()};
 const ddOpen={cat:false,src:false,site:false};
@@ -602,7 +599,7 @@ async function loadAll(silent){
       SITE_NAME[s.id]=s.name;
     });
     DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
-    if(CURRENCIES.length&&!activeCur) activeCur=CURRENCIES[0].code;
+    if(CURRENCIES.length&&selectedCurs.size===0) selectedCurs.add(CURRENCIES[0].code);
     buildCurBar();
     buildDDFromData();
     document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
@@ -628,37 +625,37 @@ function buildDDFromData(){
 function buildCurBar(){
   const bar=document.getElementById('curBar');
   bar.innerHTML=CURRENCIES.map(function(cur){
-    const isActive=activeCur===cur.code;
-    const isPinned=pinnedCurs.has(cur.code);
-    const cls=isPinned?'cur-tab pinned':isActive?'cur-tab active':'cur-tab';
-    return `<button class="${cls}" id="curtab_${cur.code}" onclick="clickCurTab('${cur.code}',event)">
+    const checked=selectedCurs.has(cur.code);
+    return `<label class="cur-ck${checked?' checked':''}" id="curlbl_${cur.code}">
+      <input type="checkbox" ${checked?'checked':''} onchange="toggleCur('${cur.code}',this.checked)">
       ${cur.label}
-      <span class="cur-pin-btn" onclick="pinCur('${cur.code}',event)" title="${isPinned?'取消固定':'固定比較'}">${isPinned?'📌':'📌'}</span>
-    </button>`;
+    </label>`;
   }).join('');
-  const pinCount=pinnedCurs.size;
-  document.getElementById('compareHint').textContent=pinCount>1?`📌 比較中：${pinCount} 個幣別`:'';
+  const cnt=selectedCurs.size;
+  document.getElementById('compareHint').textContent=cnt>1?`比較中：${cnt} 個幣別`:'';
 }
 
-function clickCurTab(code, e){
-  if(e.target.classList.contains('cur-pin-btn')) return;
-  // 記住目前 scroll 位置
+function toggleCur(code, checked){
   const tbl=document.querySelector('.tbl-outer');
   const scrollTop=tbl?tbl.scrollTop:0;
-  activeCur=code;
+  if(checked) selectedCurs.add(code);
+  else {
+    selectedCurs.delete(code);
+    // 至少保留一個
+    if(selectedCurs.size===0) selectedCurs.add(code);
+  }
+  // 同步 checkbox 狀態（避免最後一個被取消）
+  const el=document.getElementById('curlbl_'+code);
+  if(el){
+    const cb=el.querySelector('input');
+    const isNowChecked=selectedCurs.has(code);
+    if(cb)cb.checked=isNowChecked;
+    el.classList.toggle('checked',isNowChecked);
+  }
   buildCurBar();
   render();
-  // 還原 scroll 位置
   const tbl2=document.querySelector('.tbl-outer');
   if(tbl2)tbl2.scrollTop=scrollTop;
-}
-
-function pinCur(code, e){
-  e.stopPropagation();
-  if(pinnedCurs.has(code)) pinnedCurs.delete(code);
-  else pinnedCurs.add(code);
-  buildCurBar();
-  render();
 }
 
 // ── View mode ─────────────────────────────────────────
@@ -801,15 +798,11 @@ function fmtRate(v){
 function renderCurrencyTable(data){
   // Determine which currencies to show
   const showCurs=[];
-  if(pinnedCurs.size>1){
-    CURRENCIES.forEach(function(c){if(pinnedCurs.has(c.code))showCurs.push(c);});
-  } else {
-    const found=CURRENCIES.find(function(c){return c.code===activeCur;});
-    if(found)showCurs.push(found);
-  }
+  CURRENCIES.forEach(function(c){if(selectedCurs.has(c.code))showCurs.push(c);});
+  if(showCurs.length===0&&CURRENCIES.length){showCurs.push(CURRENCIES[0]);selectedCurs.add(CURRENCIES[0].code);}
   if(!showCurs.length){document.getElementById('mainContent').innerHTML='<div class="state">請先選擇幣別</div>';return;}
 
-  const isCompare=showCurs.length>1;
+  const isCompare=selectedCurs.size>1;
   let head='<tr>'+baseHead();
   if(isCompare){
     showCurs.forEach(function(cur){
