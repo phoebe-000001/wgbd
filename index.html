@@ -474,6 +474,7 @@ function enterGuestMode(){
     var el=document.getElementById(id);
     if(el)el.style.display='none';
   });
+  document.getElementById('q').placeholder='供應商名稱';
   // 隱藏顯示欄位列和清除篩選按鈕整列
   document.querySelectorAll('.filter-bar .frow').forEach(function(row){
     if(row.textContent.includes('顯示欄位'))row.style.display='none';
@@ -508,6 +509,7 @@ function exitGuestMode(){
   });
   var tabsEl=document.querySelector('.view-mode-tabs');
   if(tabsEl)tabsEl.style.display='';
+  document.getElementById('q').placeholder='供應商名稱、provider_code、遊戲來源…';
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('userInfo').innerHTML='';
 }
