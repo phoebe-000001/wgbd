@@ -818,7 +818,7 @@ function renderCurrencyTable(data){
   } else {
     head+=(isGuest?'':'<th class="r">原始費率</th>')+'<th class="r">方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方費率</th>'+(isGuest?'':'<th style="text-align:center">預設啟用</th>');
   }
-  head+='<th style="text-align:center">操作</th></tr>';
+  head+=(isGuest?'':'<th style="text-align:center">操作</th>')+'</tr>';
 
   if(isCompare){
     // second header row for sub-columns
@@ -833,7 +833,7 @@ function renderCurrencyTable(data){
     showCurs.forEach(function(){
       head+=(isGuest?'':'<th class="r" style="border-left:2px solid #c7d2fe">原始</th>')+'<th class="r"'+(isGuest?' style="border-left:2px solid #c7d2fe"':'')+'>方案一</th><th class="r">方案二</th><th class="r">方案三</th><th class="orig-h">官方</th>'+(isGuest?'':'<th style="text-align:center">啟用</th>');
     });
-    head+='<th></th></tr>';
+    head+=(isGuest?'':'<th></th>')+'</tr>';
   }
 
   let rows=data.map(function(d){
