@@ -642,9 +642,15 @@ function buildCurBar(){
 
 function clickCurTab(code, e){
   if(e.target.classList.contains('cur-pin-btn')) return;
+  // 記住目前 scroll 位置
+  const tbl=document.querySelector('.tbl-outer');
+  const scrollTop=tbl?tbl.scrollTop:0;
   activeCur=code;
   buildCurBar();
   render();
+  // 還原 scroll 位置
+  const tbl2=document.querySelector('.tbl-outer');
+  if(tbl2)tbl2.scrollTop=scrollTop;
 }
 
 function pinCur(code, e){
@@ -853,10 +859,11 @@ function renderCurrencyTable(data){
       r+=`<td class="orig-h">${fmtRate(cd.official)}</td>`;
       if(!isGuest)r+=`<td class="td-ctr"><span class="${cd.enabled==='Y'?'cy':'cn2'}">${cd.enabled==='Y'?'✓':cd.enabled==='N'?'✗':'—'}</span></td>`;
     }
-    r+=`<td class="td-ctr"><div class="abtns">
+    if(!isGuest)r+=`<td class="td-ctr"><div class="abtns">
       <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
       <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
-    </div></td></tr>`;
+    </div></td>`;
+    r+='</tr>';
     return r;
   }).join('');
 
@@ -874,7 +881,8 @@ function renderSiteRateTable(data){
   activeSites.forEach(function(s){
     head+=`<th style="text-align:right">${SITE_LABEL[s].split(' ')[0]}</th>`;
   });
-  head+='<th style="text-align:center">操作</th></tr>';
+  if(!isGuest)head+='<th style="text-align:center">操作</th>';
+  head+='</tr>';
 
   let rows=data.map(function(d){
     let r='<tr>'+baseColumns(d,true); // skip enabled col
@@ -893,10 +901,11 @@ function renderSiteRateTable(data){
         </td>`;
       }
     });
-    r+=`<td class="td-ctr"><div class="abtns">
+    if(!isGuest)r+=`<td class="td-ctr"><div class="abtns">
       <button class="btn btn-gho btn-sm" onclick="openEdit(${d.id})">編輯</button>
       <button class="btn btn-dan btn-sm" onclick="delRow(${d.id},'${esc(d.en)}')">刪除</button>
-    </div></td></tr>`;
+    </div></td>`;
+    r+='</tr>';
     return r;
   }).join('');
 
