@@ -472,10 +472,21 @@ function enterGuestMode(){
   document.getElementById('guestBanner').style.display='flex';
   document.getElementById('userInfo').innerHTML=
     '<button class="btn-signout" onclick="exitGuestMode()">登入</button>';
-  // Force currency view
+  // 隱藏遊客不需要的篩選器
+  ['fc_src','fc_site','fc_ctrl','fc_enabled'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.display='none';
+  });
+  // 隱藏顯示欄位列和清除篩選按鈕整列
+  document.querySelectorAll('.filter-bar .frow').forEach(function(row){
+    if(row.textContent.includes('顯示欄位'))row.style.display='none';
+  });
+  // 隱藏 tab
+  ['vm_site','vm_overview'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.display='none';
+  });
   switchViewMode('currency');
-  document.getElementById('vm_site').style.display='none';
-  document.getElementById('vm_overview').style.display='none';
   loadAll();
 }
 
@@ -483,6 +494,18 @@ function exitGuestMode(){
   isGuest = false;
   document.body.classList.remove('guest-mode');
   document.getElementById('guestBanner').style.display='none';
+  // 還原隱藏的元素
+  ['fc_src','fc_site','fc_ctrl','fc_enabled'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.display='';
+  });
+  document.querySelectorAll('.filter-bar .frow').forEach(function(row){
+    row.style.display='';
+  });
+  ['vm_site','vm_overview'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.display='';
+  });
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('userInfo').innerHTML='';
 }
