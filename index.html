@@ -275,6 +275,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
   </div>
   <div class="hdr-right">
     <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
+    <button class="btn-signout" onclick="loadAll(false,true)" title="強制重新整理">↻</button>
     <div id="userInfo"></div>
   </div>
 </header>
@@ -434,6 +435,8 @@ const TOKEN_EXP_KEY = 'wg_auth_exp';
 const TOKEN_NAME_KEY = 'wg_auth_name';
 const TOKEN_PIC_KEY  = 'wg_auth_pic';
 const TOKEN_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CACHE_KEY     = 'wg_data_cache';
+const CACHE_VER_KEY = 'wg_data_version';
 // ══════════════════════════════════════════════════════
 
 // 站點動態讀取，loadAll 後填入
@@ -586,26 +589,64 @@ async function apiPost(b){
   return r.json();
 }
 
-async function loadAll(silent){
+function _applyData(res){
+  DATA=res.providers||[];
+  SITE_INFO=res.sites||[];
+  CURRENCIES=res.currencies||[];
+  SITE_ORDER=SITE_INFO.map(function(s){return s.id;});
+  SITE_LABEL={};SITE_NAME={};
+  SITE_INFO.forEach(function(s){
+    SITE_LABEL[s.id]=s.name+' '+s.id;
+    SITE_NAME[s.id]=s.name;
+  });
+  DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
+  if(CURRENCIES.length&&selectedCurs.size===0) selectedCurs.add(CURRENCIES[0].code);
+  buildCurBar();
+  buildDDFromData();
+  render();
+}
+
+async function loadAll(silent,forceRefresh){
   try{
     if(!silent)document.getElementById('syncLabel').textContent='載入中…';
-    const [pRes,sRes,cRes]=await Promise.all([apiGet('getAll'),apiGet('getSites'),apiGet('getCurrencies')]);
-    if(pRes.error||sRes.error||cRes.error) throw new Error(pRes.error||sRes.error||cRes.error);
-    DATA=pRes.providers||[];
-    SITE_INFO=sRes.sites||[];
-    CURRENCIES=cRes.currencies||[];
-    SITE_ORDER=SITE_INFO.map(function(s){return s.id;});
-    SITE_LABEL={};SITE_NAME={};
-    SITE_INFO.forEach(function(s){
-      SITE_LABEL[s.id]=s.name+' '+s.id;
-      SITE_NAME[s.id]=s.name;
-    });
-    DD_CFG.site.opts=SITE_INFO.map(function(s){return{v:s.id,l:s.name+' '+s.id};});
-    if(CURRENCIES.length&&selectedCurs.size===0) selectedCurs.add(CURRENCIES[0].code);
-    buildCurBar();
-    buildDDFromData();
+
+    // 嘗試從快取載入（先快速顯示）
+    if(!forceRefresh){
+      try{
+        const cached=localStorage.getItem(CACHE_KEY);
+        if(cached){
+          const cachedData=JSON.parse(cached);
+          _applyData(cachedData);
+          document.getElementById('syncLabel').textContent='快取 · 確認更新中…';
+          // 快取載入完後，背景確認版本
+          const verRes=await apiGet('getVersion');
+          const cachedVer=parseInt(localStorage.getItem(CACHE_VER_KEY)||'0');
+          if(verRes.version&&verRes.version<=cachedVer){
+            // 版本一致，直接用快取
+            document.getElementById('syncLabel').textContent='已同步（快取）· '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+            return;
+          }
+          // 版本不一致，繼續拉新資料
+          document.getElementById('syncLabel').textContent='更新中…';
+        }
+      }catch(e){}
+    } else {
+      localStorage.removeItem(CACHE_KEY);
+      localStorage.removeItem(CACHE_VER_KEY);
+    }
+
+    // 拉新資料（單一請求）
+    const res=await apiGet('getAll');
+    if(res.error) throw new Error(res.error);
+
+    // 存快取
+    try{
+      localStorage.setItem(CACHE_KEY, JSON.stringify(res));
+      if(res.version) localStorage.setItem(CACHE_VER_KEY, String(res.version));
+    }catch(e){}
+
+    _applyData(res);
     document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-    render();
   }catch(e){
     document.getElementById('syncLabel').textContent='連線失敗';
     if(!silent&&!DATA.length){
@@ -1158,7 +1199,7 @@ async function saveMo(){
     if(res.error){toast('錯誤：'+res.error,true);return;}
     closeMo();toast('儲存中，刷新列表…',false,true);
     await new Promise(function(r){setTimeout(r,1500);});
-    await loadAll();
+    await loadAll(false,true); // 強制清快取
     toast(editingId!==null?'已儲存 ✓':'已新增 ✓');
   }catch(e){toast('連線錯誤：'+e.message,true);}
   finally{btn.textContent=editingId!==null?'儲存所有變更':'新增';btn.disabled=false;}
@@ -1175,7 +1216,7 @@ async function delRow(id,name){
     toast('已刪除，刷新列表中…',false,true);
     // 等 1.5 秒讓 Apps Script 處理完再刷新
     await new Promise(function(r){setTimeout(r,1500);});
-    await loadAll();
+    await loadAll(false,true); // 強制清快取
     toast('已刪除 ✓');
   }catch(e){
     toast('連線錯誤：'+e.message,true);
