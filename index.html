@@ -31,9 +31,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;di
 
 /* Header */
 .hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;height:54px;flex-shrink:0;z-index:300;position:relative;}
-.logo{font-size:14px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
+.logo{font-size:14px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;}
-.hdr-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;}
+.hdr-center{position:absolute;left:50%;transform:translateX(-50%);}
 .hdr-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
 .sync{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:6px;}
 .sync-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
@@ -41,7 +41,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;di
 .user-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);}
 .user-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;margin:2px;}
 .btn-signout{height:26px;padding:0 10px;font-size:11px;border:1px solid var(--bdr);border-radius:6px;background:transparent;color:var(--t2);cursor:pointer;}
-.hdr-right{display:flex;align-items:center;gap:8px;}
 #userInfo{display:flex;align-items:center;gap:6px;}
 
 /* Layout */
@@ -255,7 +254,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 
 /* ── Mobile responsive ── */
 .hdr-desktop{display:flex;align-items:center;flex:1;}
-.hamburger{display:none;width:36px;height:36px;border:none;background:transparent;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0;flex-shrink:0;}
+.mob-hdr-right{display:none;}.hamburger{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0;flex-shrink:0;}
 .hamburger span{display:block;width:18px;height:1.5px;background:var(--t);border-radius:2px;transition:all .2s;}
 .mob-menu{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);}
 .mob-menu.open{display:block;}
@@ -273,9 +272,8 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 .mob-sync{padding:10px 16px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);margin-top:auto;display:flex;align-items:center;gap:6px;}
 @media(max-width:768px){
   .hdr{padding:0 16px;}
-  .hdr-center{display:none!important;}
-  .hdr-right{display:none!important;}
-  .mob-hdr-right{display:flex!important;}
+  .hdr-center,.hdr-right{display:none!important;}
+  .mob-hdr-right{display:flex!important;align-items:center;gap:8px;margin-left:auto;}
   .view-mode-tabs{display:none!important;}
 }
 </style>
@@ -295,23 +293,21 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>Wingea 費率表</div>
-  <!-- Desktop -->
-  <div class="hdr-desktop" style="display:contents;">
-    <div class="hdr-center">
-      <div class="view-mode-tabs">
-        <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
-        <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
-        <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
-      </div>
-    </div>
-    <div class="hdr-right">
-      <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
-      <button class="btn-signout" onclick="loadAll(false,true)" title="強制重新整理">↻</button>
-      <div id="userInfo"></div>
+  <!-- Desktop: tabs (absolute center) + right actions -->
+  <div class="hdr-center">
+    <div class="view-mode-tabs">
+      <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
+      <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
+      <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
     </div>
   </div>
-  <!-- Mobile only: avatar + hamburger (hidden on desktop via CSS) -->
-  <div class="mob-hdr-right" style="display:none;align-items:center;gap:8px;margin-left:auto;">
+  <div class="hdr-right">
+    <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
+    <button class="btn-signout" onclick="loadAll(false,true)" title="強制重新整理">↻</button>
+    <div id="userInfo"></div>
+  </div>
+  <!-- Mobile only: avatar + sync + hamburger -->
+  <div class="mob-hdr-right">
     <div id="mobAvatar"></div>
     <div id="syncMob" class="sync"><div class="sync-dot"></div><span id="syncLabelMob"></span></div>
     <button class="hamburger" id="hamburgerBtn" onclick="openMobMenu()" aria-label="選單">
