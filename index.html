@@ -1013,7 +1013,7 @@ function emptyRow(){return'<tr><td colspan="40" style="text-align:center;padding
 // ── Site overview ─────────────────────────────────────
 function renderSiteOverview(filteredData){
   const cards=SITE_INFO.map(function(si){
-    const count=filteredData.filter(function(d){return d.sites&&d.sites[si.id]&&d.sites[si.id].r!==null;}).length;
+    const count=filteredData.filter(function(d){return d.sites&&d.sites[si.id]&&d.sites[si.id].enabled==='Y';}).length;
     return `<div class="sc">
       <div class="sc-head"><div class="sc-name">${esc(si.name)}<span class="sc-id">${si.id}</span></div><div class="sc-backend">${si.backend}</div></div>
       <div class="sc-body">
@@ -1026,7 +1026,7 @@ function renderSiteOverview(filteredData){
         <div class="sc-row"><span class="sc-lbl">維護費</span><span class="sc-val">${si.maint>0?si.maint+' u / 月':'免'}</span></div>
         <div class="sc-row"><span class="sc-lbl">每月買分</span><span class="sc-val">${si.monthly||0}</span></div>
         ${si.note?`<div class="sc-row"><span class="sc-lbl">備註</span><span class="sc-val warn">${esc(si.note)}</span></div>`:''}
-        <div class="sc-count">${count} 個供應商已設費率</div>
+        <div class="sc-count">預設啟用 ${count} 個供應商</div>
         <button class="btn btn-gho btn-sm" style="width:100%;margin-top:8px;justify-content:center;" onclick="downloadSiteCSV('${si.id}','${esc(si.sheetName||si.name)}')">⬇ 下載費率表</button>
       </div>
     </div>`;
