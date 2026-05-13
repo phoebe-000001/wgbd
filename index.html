@@ -30,10 +30,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;di
 .login-err{font-size:12px;color:var(--red);margin-top:14px;padding:8px 12px;background:var(--redbg);border-radius:8px;display:none;}
 
 /* Header */
-.hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:54px;flex-shrink:0;z-index:300;}
+.hdr{background:var(--sur);border-bottom:1px solid var(--bdr);padding:0 28px;display:flex;align-items:center;height:54px;flex-shrink:0;z-index:300;position:relative;}
 .logo{font-size:14px;font-weight:600;letter-spacing:-.3px;display:flex;align-items:center;gap:8px;}
 .logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;}
-.hdr-right{display:flex;align-items:center;gap:12px;}
+.hdr-center{position:absolute;left:50%;transform:translateX(-50%);display:flex;}
+.hdr-right{display:flex;align-items:center;gap:8px;margin-left:auto;}
 .sync{font-size:12px;color:var(--t3);display:flex;align-items:center;gap:6px;}
 .sync-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -272,8 +273,8 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 .mob-sync{padding:10px 16px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);margin-top:auto;display:flex;align-items:center;gap:6px;}
 @media(max-width:768px){
   .hdr{padding:0 16px;}
-  .hdr-desktop{display:none;}
-  .hamburger{display:flex;}
+  .hdr-center{display:none!important;}
+  .hdr-right{display:none!important;}
   .mob-hdr-right{display:flex!important;}
   .view-mode-tabs{display:none!important;}
 }
@@ -295,11 +296,13 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>Wingea 費率表</div>
   <!-- Desktop -->
-  <div class="hdr-desktop">
-    <div class="view-mode-tabs" style="margin-left:24px;">
-      <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
-      <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
-      <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
+  <div class="hdr-desktop" style="display:contents;">
+    <div class="hdr-center">
+      <div class="view-mode-tabs">
+        <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
+        <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
+        <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
+      </div>
     </div>
     <div class="hdr-right">
       <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
