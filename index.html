@@ -1294,12 +1294,12 @@ function buildMobMenu(){
         ${m[1]}${active?'<span class="mob-badge">目前頁面</span>':''}
       </div>`;
     });
-    items+=`<div class="mob-item" onclick="loadAll(false,true);closeMobMenu()">↻ 重新整理</div>`;
+    items+=`<div class="mob-item" onclick="closeMobMenu();toast('更新中…',false,true);loadAll(false,true).then(function(){toast('已更新 ✓');}).catch(function(){toast('更新失敗',true);});">↻ 重新整理</div>`;
     items+=`<div class="mob-item" style="color:var(--red)" onclick="signOut();closeMobMenu()">登出</div>`;
   } else {
     // Guest: only currency tab + refresh + login
     items+=`<div class="mob-item active">幣別費率 <span class="mob-badge">目前頁面</span></div>`;
-    items+=`<div class="mob-item" onclick="loadAll(false,true);closeMobMenu()">↻ 重新整理</div>`;
+    items+=`<div class="mob-item" onclick="closeMobMenu();toast('更新中…',false,true);loadAll(false,true).then(function(){toast('已更新 ✓');}).catch(function(){toast('更新失敗',true);});">↻ 重新整理</div>`;
     items+=`<div class="mob-login-section">
       <div class="mob-login-hint">登入以使用完整功能</div>
       <button class="mob-login-btn" onclick="exitGuestMode();closeMobMenu()">以 wingea.vip 帳號登入</button>
