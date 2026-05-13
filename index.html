@@ -20,6 +20,12 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
+@media(max-width:768px){
+  body,html{height:auto!important;overflow:auto!important;}
+  .page{overflow:visible!important;flex:none!important;height:auto!important;}
+  .site-grid{overflow:visible!important;}
+}
+
 /* Login */
 .login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;}
 .login-card{background:var(--sur);border:1px solid var(--bdr);border-radius:16px;padding:40px 48px;text-align:center;max-width:380px;width:100%;box-shadow:0 4px 24px rgba(0,0,0,.08);}
@@ -421,7 +427,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
   </div>
 </div>
 
-<div id="mainContent" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
+<div id="mainContent" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;" class="main-content"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
 </div>
 
 <!-- Modal -->
@@ -839,6 +845,7 @@ function th(k,l,ex){ex=ex||'';return`<th onclick="doSort('${k}')" class="${sortK
 // ── Render ────────────────────────────────────────────
 function render(){
   if(!DATA.length)return;
+  setTimeout(fixMobileScroll,50);
   let data=getFiltered();
   if(sortK){
     data.sort(function(a,b){
@@ -1331,6 +1338,21 @@ function _syncMobLabel(){
   if(mobLbl&&lbl) mobLbl.textContent=lbl.textContent;
   if(drawerLbl&&lbl) drawerLbl.textContent=lbl.textContent;
 }
+
+
+// Fix mobile scroll - override inline overflow:hidden
+function fixMobileScroll(){
+  if(window.innerWidth<=768){
+    var mc=document.getElementById('mainContent');
+    var page=document.querySelector('.page');
+    if(mc){mc.style.overflow='visible';mc.style.flex='none';mc.style.minHeight='auto';}
+    if(page){page.style.overflow='visible';page.style.flex='none';}
+    var tbl=document.querySelector('.tbl-outer');
+    if(tbl){tbl.style.overflow='auto';tbl.style.maxHeight='70vh';tbl.style.flex='none';}
+  }
+}
+window.addEventListener('resize',fixMobileScroll);
+document.addEventListener('DOMContentLoaded',fixMobileScroll);
 
 function toast(msg,isErr,persist){
   const t=document.getElementById('toast');
