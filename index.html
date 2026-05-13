@@ -251,6 +251,31 @@ body.guest-mode .btn-dan,
 body.guest-mode .abtns{display:none;}
 body.guest-mode .rc-click{cursor:default;pointer-events:none;}
 body.guest-mode .null-cell{cursor:default;pointer-events:none;}
+
+/* ── Mobile responsive ── */
+.hdr-desktop{display:flex;align-items:center;flex:1;}
+.hamburger{display:none;width:36px;height:36px;border:none;background:transparent;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:0;flex-shrink:0;}
+.hamburger span{display:block;width:18px;height:1.5px;background:var(--t);border-radius:2px;transition:all .2s;}
+.mob-menu{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);}
+.mob-menu.open{display:block;}
+.mob-drawer{position:absolute;top:0;right:0;bottom:0;width:min(300px,85vw);background:var(--sur);box-shadow:-4px 0 24px rgba(0,0,0,.15);display:flex;flex-direction:column;}
+.mob-drawer-hd{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:54px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.mob-drawer-logo{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;}
+.mob-close{width:32px;height:32px;border:none;background:transparent;font-size:18px;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mob-item{display:flex;align-items:center;padding:14px 16px;font-size:14px;color:var(--t2);border-bottom:1px solid var(--bdr);cursor:pointer;gap:10px;}
+.mob-item:hover{background:var(--sur2);}
+.mob-item.active{color:var(--accent);font-weight:500;}
+.mob-badge{font-size:10px;background:var(--abg);color:var(--accent);padding:2px 6px;border-radius:4px;margin-left:6px;}
+.mob-login-section{padding:16px;background:var(--sur2);}
+.mob-login-hint{font-size:12px;color:var(--t2);margin-bottom:10px;}
+.mob-login-btn{width:100%;height:36px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;}
+.mob-sync{padding:10px 16px;font-size:11px;color:var(--t3);border-top:1px solid var(--bdr);margin-top:auto;display:flex;align-items:center;gap:6px;}
+@media(max-width:768px){
+  .hdr{padding:0 16px;}
+  .hdr-desktop{display:none;}
+  .hamburger{display:flex;}
+  .view-mode-tabs{display:none!important;}
+}
 </style>
 </head>
 <body>
@@ -268,17 +293,40 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
 
 <header class="hdr">
   <div class="logo"><div class="logo-dot"></div>Wingea 費率表</div>
-  <div class="view-mode-tabs" style="margin-left:24px;">
-    <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
-    <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
-    <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
+  <!-- Desktop -->
+  <div class="hdr-desktop">
+    <div class="view-mode-tabs" style="margin-left:24px;">
+      <button class="vm-tab on" id="vm_cur" onclick="switchViewMode('currency')">幣別費率</button>
+      <button class="vm-tab" id="vm_site" onclick="switchViewMode('site_rate')">站點費率</button>
+      <button class="vm-tab" id="vm_overview" onclick="switchViewMode('site_overview')">站點統整</button>
+    </div>
+    <div class="hdr-right">
+      <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
+      <button class="btn-signout" onclick="loadAll(false,true)" title="強制重新整理">↻</button>
+      <div id="userInfo"></div>
+    </div>
   </div>
-  <div class="hdr-right">
-    <div class="sync"><div class="sync-dot"></div><span id="syncLabel">連接中…</span></div>
-    <button class="btn-signout" onclick="loadAll(false,true)" title="強制重新整理">↻</button>
-    <div id="userInfo"></div>
+  <!-- Mobile: avatar (if logged in) + hamburger -->
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+    <div id="mobAvatar" style="display:none"></div>
+    <div id="syncMob" class="sync" style="display:flex"><div class="sync-dot"></div><span id="syncLabelMob"></span></div>
+    <button class="hamburger" id="hamburgerBtn" onclick="openMobMenu()" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
+
+<!-- Mobile drawer -->
+<div class="mob-menu" id="mobMenu" onclick="if(event.target===this)closeMobMenu()">
+  <div class="mob-drawer">
+    <div class="mob-drawer-hd">
+      <div class="mob-drawer-logo"><div class="logo-dot"></div>Wingea 費率表</div>
+      <button class="mob-close" onclick="closeMobMenu()">✕</button>
+    </div>
+    <div id="mobMenuItems"></div>
+    <div class="mob-sync"><div class="sync-dot"></div><span id="syncLabelDrawer">連接中…</span></div>
+  </div>
+</div>
 
 <div id="guestBanner" class="guest-banner" style="display:none">👁 <strong>遊客模式</strong> · 僅供查閱，如對費率有疑問，請洽對接商務</div>
 <div class="page">
@@ -563,6 +611,7 @@ function showUser(name, pic){
   document.getElementById('userInfo').innerHTML=
     (pic?`<img src="${pic}" class="user-avatar" title="${esc(name)}">`:'<div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff">'+esc(name.charAt(0))+'</div>') +
     `<button class="btn-signout" onclick="signOut()">登出</button>`;
+  _updateMobAvatar(pic, name);
 }
 
 function signOut(){
@@ -647,6 +696,7 @@ async function loadAll(silent,forceRefresh){
 
     _applyData(res);
     document.getElementById('syncLabel').textContent='已同步 · '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    _syncMobLabel();
   }catch(e){
     document.getElementById('syncLabel').textContent='連線失敗';
     if(!silent&&!DATA.length){
@@ -1222,6 +1272,64 @@ async function delRow(id,name){
     toast('連線錯誤：'+e.message,true);
     btns.forEach(function(b){b.disabled=false;});
   }
+}
+
+
+// ── Mobile menu ───────────────────────────────────────────
+function openMobMenu(){
+  buildMobMenu();
+  document.getElementById('mobMenu').classList.add('open');
+}
+function closeMobMenu(){
+  document.getElementById('mobMenu').classList.remove('open');
+}
+function buildMobMenu(){
+  var items='';
+  if(!isGuest){
+    // Logged in: show all tabs + refresh + logout
+    var modes=[['currency','幣別費率'],['site_rate','站點費率'],['site_overview','站點統整']];
+    modes.forEach(function(m){
+      var active=viewMode===m[0];
+      items+=`<div class="mob-item${active?' active':''}" onclick="switchViewMode('${m[0]}');closeMobMenu()">
+        ${m[1]}${active?'<span class="mob-badge">目前頁面</span>':''}
+      </div>`;
+    });
+    items+=`<div class="mob-item" onclick="loadAll(false,true);closeMobMenu()">↻ 重新整理</div>`;
+    items+=`<div class="mob-item" style="color:var(--red)" onclick="signOut();closeMobMenu()">登出</div>`;
+  } else {
+    // Guest: only currency tab + refresh + login
+    items+=`<div class="mob-item active">幣別費率 <span class="mob-badge">目前頁面</span></div>`;
+    items+=`<div class="mob-item" onclick="loadAll(false,true);closeMobMenu()">↻ 重新整理</div>`;
+    items+=`<div class="mob-login-section">
+      <div class="mob-login-hint">登入以使用完整功能</div>
+      <button class="mob-login-btn" onclick="exitGuestMode();closeMobMenu()">以 wingea.vip 帳號登入</button>
+    </div>`;
+  }
+  document.getElementById('mobMenuItems').innerHTML=items;
+  // sync label
+  var lbl=document.getElementById('syncLabel');
+  document.getElementById('syncLabelDrawer').textContent=lbl?lbl.textContent:'';
+}
+
+function _updateMobAvatar(pic, name){
+  var mob=document.getElementById('mobAvatar');
+  if(!mob)return;
+  if(pic){
+    mob.style.display='block';
+    mob.innerHTML=`<img src="${pic}" class="user-avatar" title="${name}" onerror="this.style.display='none'">`;
+  } else {
+    mob.style.display='none';
+  }
+}
+
+// Override syncLabel updates to also update mobile
+var _origSync=null;
+function _syncMobLabel(){
+  var lbl=document.getElementById('syncLabel');
+  var mobLbl=document.getElementById('syncLabelMob');
+  var drawerLbl=document.getElementById('syncLabelDrawer');
+  if(mobLbl&&lbl) mobLbl.textContent=lbl.textContent;
+  if(drawerLbl&&lbl) drawerLbl.textContent=lbl.textContent;
 }
 
 function toast(msg,isErr,persist){
