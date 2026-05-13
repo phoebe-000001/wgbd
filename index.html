@@ -21,9 +21,10 @@
 body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
 @media(max-width:768px){
-  body,html{height:auto!important;overflow:auto!important;}
+  body{height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;}
   .page{overflow:visible!important;flex:none!important;height:auto!important;}
-  .tbl-outer{flex:none!important;max-height:70vh!important;}
+  .main-content{overflow:visible!important;flex:none!important;min-height:auto!important;}
+  .tbl-outer{flex:none!important;max-height:none!important;overflow:visible!important;}
   .site-grid{overflow:visible!important;}
 }
 
@@ -135,6 +136,7 @@ input[type=text]:focus{border-color:var(--accent);background:#fff;}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* Table wrapper with sticky */
+.main-content{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;}
 .tbl-outer{overflow:auto;border:1px solid var(--bdr);border-radius:12px;background:var(--sur);flex:1;min-height:0;}
 table{width:100%;border-collapse:collapse;font-size:12px;}
 thead th{background:var(--sur2);color:var(--t2);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;padding:9px 10px;text-align:left;border-bottom:1px solid var(--bdr);white-space:nowrap;cursor:pointer;user-select:none;
@@ -428,7 +430,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
   </div>
 </div>
 
-<div id="mainContent" style="flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;" class="main-content"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
+<div id="mainContent" class="main-content"><div class="state"><div class="spin"></div>正在讀取資料…</div></div>
 </div>
 
 <!-- Modal -->
@@ -1340,20 +1342,7 @@ function _syncMobLabel(){
 }
 
 
-// Fix mobile scroll - override inline overflow:hidden on mobile only
-function fixMobileScroll(){
-  var mc=document.getElementById('mainContent');
-  var page=document.querySelector('.page');
-  if(window.innerWidth<=768){
-    if(mc){mc.style.overflow='visible';mc.style.flex='none';mc.style.minHeight='auto';}
-    if(page){page.style.overflow='visible';page.style.flex='none';}
-  } else {
-    if(mc){mc.style.overflow='hidden';mc.style.flex='1';mc.style.minHeight='0';}
-    if(page){page.style.overflow='hidden';page.style.flex='1';}
-  }
-}
-window.addEventListener('resize',fixMobileScroll);
-document.addEventListener('DOMContentLoaded',fixMobileScroll);
+
 
 function toast(msg,isErr,persist){
   const t=document.getElementById('toast');
