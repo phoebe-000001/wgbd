@@ -1027,10 +1027,94 @@ function renderSiteOverview(filteredData){
         <div class="sc-row"><span class="sc-lbl">每月買分</span><span class="sc-val">${si.monthly||0}</span></div>
         ${si.note?`<div class="sc-row"><span class="sc-lbl">備註</span><span class="sc-val warn">${esc(si.note)}</span></div>`:''}
         <div class="sc-count">${count} 個供應商已設費率</div>
+        <button class="btn btn-gho btn-sm" style="width:100%;margin-top:8px;justify-content:center;" onclick="downloadSiteCSV('${si.id}','${esc(si.sheetName||si.name)}')">⬇ 下載費率表</button>
       </div>
     </div>`;
   }).join('');
   document.getElementById('mainContent').innerHTML=`<div class="site-grid">${cards}</div>`;
+}
+
+async function downloadSiteCSV(siteId, sheetName){
+  // 先確認最新資料
+  toast('確認最新資料中…',false,true);
+  try{
+    await loadAll(true,true);
+  }catch(e){
+    toast('無法取得最新資料：'+e.message,true);
+    return;
+  }
+
+  const COLS = [
+    {h:'id',           fn:function(d){return d.id;}},
+    {h:'供應商英文名',   fn:function(d){return d.en;}},
+    {h:'供應商中文名',   fn:function(d){return d.cn;}},
+    {h:'Category',     fn:function(d){return d.cat;}},
+    {h:'your_rate',    fn:function(d){return d.sites[siteId]&&d.sites[siteId].r!==null?d.sites[siteId].r:'';}},
+    {h:'official_rate',fn:function(d){return d.sites[siteId]&&d.sites[siteId].offRate!==null?d.sites[siteId].offRate:'';}},
+    {h:'利潤%',         fn:function(d){return d.sites[siteId]&&d.sites[siteId].p!==null?d.sites[siteId].p:'';}},
+    {h:'原始費率',       fn:function(d){
+      var s=d.sites[siteId];
+      return s&&s.orig!==null?s.orig:'';
+    }},
+    {h:'遊戲來源',      fn:function(d){return d.source;}},
+    {h:'可控',          fn:function(d){return d.ctrl;}},
+    {h:'備註',          fn:function(d){return d.note;}},
+    {h:'預設啟用',      fn:function(d){return d.sites[siteId]?d.sites[siteId].enabled:'';}},
+    {h:'category_icon',fn:function(d){return d.cat_icon;}},
+    {h:'balance_icon', fn:function(d){return d.bal_icon;}},
+    {h:'provider_code',fn:function(d){return d.prov_code;}},
+    {h:'external_category_code',fn:function(d){return d.ext_cat;}},
+    {h:'game_category',fn:function(d){return d.sites[siteId]?d.sites[siteId].gameCat:'external';}},
+    {h:'currency',     fn:function(d){return d.sites[siteId]?d.sites[siteId].currency:'usdt';}},
+  ];
+
+  // 找原始費率欄名（用站點第一筆有資料的 origCol）
+  var origColName = '原始費率';
+  for(var i=0;i<DATA.length;i++){
+    var s=DATA[i].sites&&DATA[i].sites[siteId];
+    if(s&&s.origCol){origColName=s.origCol;break;}
+  }
+  COLS[7].h = origColName;
+
+  // 篩選 預設啟用=Y 的供應商
+  const rows = DATA.filter(function(d){
+    return d.sites && d.sites[siteId] && d.sites[siteId].enabled === 'Y';
+  });
+
+  if(!rows.length){
+    toast('此站點沒有預設啟用=Y的供應商',true);
+    return;
+  }
+
+  // 組合 CSV
+  function csvCell(v){
+    if(v===null||v===undefined)return '';
+    var s=String(v);
+    if(s.includes(',')||s.includes('"')||s.includes('\n')){
+      return '"'+s.replace(/"/g,'""')+'"';
+    }
+    return s;
+  }
+
+  const header=COLS.map(function(c){return csvCell(c.h);}).join(',');
+  const body=rows.map(function(d){
+    return COLS.map(function(c){return csvCell(c.fn(d));}).join(',');
+  }).join('\n');
+  const csv='\uFEFF'+header+'\n'+body; // BOM for Excel UTF-8
+
+  // 下載
+  const today=new Date();
+  const dateStr=today.getFullYear()+
+    String(today.getMonth()+1).padStart(2,'0')+
+    String(today.getDate()).padStart(2,'0');
+  const filename=sheetName+' '+dateStr+'.csv';
+
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+  toast('已下載：'+filename);
 }
 
 // ── Inline site rate edit ─────────────────────────────
