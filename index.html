@@ -23,6 +23,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--t);height:100vh;di
 @media(max-width:768px){
   body,html{height:auto!important;overflow:auto!important;}
   .page{overflow:visible!important;flex:none!important;height:auto!important;}
+  .tbl-outer{flex:none!important;max-height:70vh!important;}
   .site-grid{overflow:visible!important;}
 }
 
@@ -845,7 +846,6 @@ function th(k,l,ex){ex=ex||'';return`<th onclick="doSort('${k}')" class="${sortK
 // ── Render ────────────────────────────────────────────
 function render(){
   if(!DATA.length)return;
-  setTimeout(fixMobileScroll,50);
   let data=getFiltered();
   if(sortK){
     data.sort(function(a,b){
@@ -1340,20 +1340,16 @@ function _syncMobLabel(){
 }
 
 
-// Fix mobile scroll - override inline overflow:hidden
+// Fix mobile scroll - override inline overflow:hidden on mobile only
 function fixMobileScroll(){
   var mc=document.getElementById('mainContent');
   var page=document.querySelector('.page');
-  var tbl=document.querySelector('.tbl-outer');
   if(window.innerWidth<=768){
     if(mc){mc.style.overflow='visible';mc.style.flex='none';mc.style.minHeight='auto';}
     if(page){page.style.overflow='visible';page.style.flex='none';}
-    if(tbl){tbl.style.overflow='auto';tbl.style.maxHeight='70vh';tbl.style.flex='none';}
   } else {
-    // 桌面版：還原
     if(mc){mc.style.overflow='hidden';mc.style.flex='1';mc.style.minHeight='0';}
     if(page){page.style.overflow='hidden';page.style.flex='1';}
-    if(tbl){tbl.style.overflow='auto';tbl.style.maxHeight='';tbl.style.flex='1';}
   }
 }
 window.addEventListener('resize',fixMobileScroll);
