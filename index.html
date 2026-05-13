@@ -445,8 +445,8 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
           <option value="slots">Slots 電子</option><option value="live">Live 視訊</option>
           <option value="sports">Sports 體育</option><option value="lottery">Lottery 彩票</option>
           <option value="fish">Fish 捕魚</option><option value="poker">Poker 棋牌</option>
-          <option value="mini game">Mini Game</option><option value="e-sports">E-Sports</option>
-          <option value="cockfight">Cockfight</option>
+          <option value="mini game">Mini Game 小遊戲</option><option value="e-sports">E-Sports 電競</option>
+          <option value="cockfight">Cockfight 鬥雞</option>
         </select>
       </div>
       <div class="fgp"><label class="fl">遊戲來源</label>
@@ -502,12 +502,12 @@ const CAT_OPTS = [
   {v:'slots',l:'Slots 電子',dot:'#1d4ed8'},{v:'live',l:'Live 視訊',dot:'#065f46'},
   {v:'sports',l:'Sports 體育',dot:'#92400e'},{v:'lottery',l:'Lottery 彩票',dot:'#5b21b6'},
   {v:'fish',l:'Fish 捕魚',dot:'#166534'},{v:'poker',l:'Poker 棋牌',dot:'#9d174d'},
-  {v:'mini game',l:'Mini Game',dot:'#9a3412'},{v:'e-sports',l:'E-Sports',dot:'#0c4a6e'},
-  {v:'cockfight',l:'Cockfight',dot:'#991b1b'},
+  {v:'mini game',l:'Mini Game 小遊戲',dot:'#9a3412'},{v:'e-sports',l:'E-Sports 電競',dot:'#0c4a6e'},
+  {v:'cockfight',l:'Cockfight 鬥雞',dot:'#991b1b'},
 ];
 const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(function(v){return{v:v,l:v};});
 const CAT_CLS = {slots:'b-slots',live:'b-live',sports:'b-sports',lottery:'b-lottery',fish:'b-fish',poker:'b-poker','mini game':'b-mini','e-sports':'b-esports',cockfight:'b-cock'};
-const CAT_LBL = {slots:'Slots',live:'Live',sports:'Sports',lottery:'彩票',fish:'Fish',poker:'棋牌','mini game':'Mini','e-sports':'E-Sports',cockfight:'鬥雞'};
+const CAT_LBL = {slots:'電子',live:'視訊',sports:'體育',lottery:'彩票',fish:'捕魚',poker:'棋牌','mini game':'小遊戲','e-sports':'電競',cockfight:'鬥雞'};
 const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:[]}};
 
 let DATA=[], SITE_INFO=[], CURRENCIES=[];
