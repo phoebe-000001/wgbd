@@ -274,6 +274,7 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
   .hdr{padding:0 16px;}
   .hdr-desktop{display:none;}
   .hamburger{display:flex;}
+  .mob-hdr-right{display:flex!important;}
   .view-mode-tabs{display:none!important;}
 }
 </style>
@@ -306,10 +307,10 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
       <div id="userInfo"></div>
     </div>
   </div>
-  <!-- Mobile: avatar (if logged in) + hamburger -->
-  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-    <div id="mobAvatar" style="display:none"></div>
-    <div id="syncMob" class="sync" style="display:flex"><div class="sync-dot"></div><span id="syncLabelMob"></span></div>
+  <!-- Mobile only: avatar + hamburger (hidden on desktop via CSS) -->
+  <div class="mob-hdr-right" style="display:none;align-items:center;gap:8px;margin-left:auto;">
+    <div id="mobAvatar"></div>
+    <div id="syncMob" class="sync"><div class="sync-dot"></div><span id="syncLabelMob"></span></div>
     <button class="hamburger" id="hamburgerBtn" onclick="openMobMenu()" aria-label="選單">
       <span></span><span></span><span></span>
     </button>
