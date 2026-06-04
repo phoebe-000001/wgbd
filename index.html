@@ -874,6 +874,10 @@ function th(k,l,ex){ex=ex||'';return`<th onclick="doSort('${k}')" class="${sortK
 // ── Render ────────────────────────────────────────────
 function render(){
   if(!DATA.length)return;
+  // 保存目前 scroll 位置
+  const tblOuter=document.querySelector('.tbl-outer');
+  const savedScroll=tblOuter?tblOuter.scrollTop:0;
+
   let data=getFiltered();
   if(sortK){
     data.sort(function(a,b){
@@ -886,6 +890,9 @@ function render(){
   if(viewMode==='currency') renderCurrencyTable(data);
   else if(viewMode==='site_rate') renderSiteRateTable(data);
   else renderSiteOverview(data);
+  // 恢復 scroll 位置
+  const tblOuter2=document.querySelector('.tbl-outer');
+  if(tblOuter2) tblOuter2.scrollTop=savedScroll;
 }
 
 function baseColumns(d,skipEnabled){
@@ -897,10 +904,10 @@ function baseColumns(d,skipEnabled){
   if(ck('ck_src'))  r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
   if(ck('ck_ctrl'))r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
   if(ck('ck_enabled')&&!skipEnabled)r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
-  if(ck('ck_cat_icon'))r+=`<td class="mono">${d.cat_icon?esc(d.cat_icon.slice(0,20))+'…':'—'}</td>`;
-  if(ck('ck_bal_icon'))r+=`<td class="mono">${d.bal_icon?esc(d.bal_icon.slice(0,20))+'…':'—'}</td>`;
-  if(ck('ck_prov'))r+=`<td class="mono">${d.prov_code?`<span title="${esc(d.prov_code)}">${esc(d.prov_code)}</span>`:'—'}</td>`;
-  if(ck('ck_ext')) r+=`<td class="mono">${d.ext_cat||'—'}</td>`;
+  if(ck('ck_cat_icon'))r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.cat_icon?esc(d.cat_icon):'—'}</td>`;
+  if(ck('ck_bal_icon'))r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.bal_icon?esc(d.bal_icon):'—'}</td>`;
+  if(ck('ck_prov'))r+=`<td class="mono" style="min-width:140px;word-break:break-all">${d.prov_code?esc(d.prov_code):'—'}</td>`;
+  if(ck('ck_ext')) r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.ext_cat?esc(d.ext_cat):'—'}</td>`;
   return r;
 }
 
