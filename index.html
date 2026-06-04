@@ -450,11 +450,15 @@ body.guest-mode .null-cell{cursor:default;pointer-events:none;}
         </select>
       </div>
       <div class="fgp"><label class="fl">遊戲來源</label>
-        <select class="fsel" id="f_source">
-          <option>自研</option><option>ZF one api</option><option>ZF單接</option>
-          <option>OMG集成</option><option>HG集成</option><option>IM集成</option>
-          <option>單接</option><option>JVD FA api</option>
+        <select class="fsel" id="f_source" onchange="onSrcSelectChange(this)" style="width:100%">
+          <option value="">— 選擇來源 —</option>
+          <option value="__new__">＋ 新增遊戲來源…</option>
         </select>
+        <div id="f_source_new_wrap" style="display:none;margin-top:6px;gap:6px;align-items:center;flex-wrap:wrap">
+          <input type="text" class="fi" id="f_source_new" placeholder="輸入新遊戲來源名稱" style="flex:1;min-width:120px">
+          <button type="button" onclick="confirmNewSrc()" style="padding:4px 10px;background:var(--acc);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap">確認新增</button>
+          <button type="button" onclick="cancelNewSrc()" style="padding:4px 8px;background:var(--bd);color:var(--t);border:none;border-radius:6px;cursor:pointer;font-size:13px">取消</button>
+        </div>
       </div>
       <div class="fgp"><label class="fl">可控</label><select class="fsel" id="f_ctrl"><option value="Y">Y</option><option value="N">N</option></select></div>
       <div class="fgp"><label class="fl">全域預設啟用</label><select class="fsel" id="f_enabled"><option value="Y">Y</option><option value="N">N</option></select></div>
@@ -505,7 +509,29 @@ const CAT_OPTS = [
   {v:'mini game',l:'Mini Game 小遊戲',dot:'#9a3412'},{v:'e-sports',l:'E-Sports 電競',dot:'#0c4a6e'},
   {v:'cockfight',l:'Cockfight 鬥雞',dot:'#991b1b'},
 ];
-const SRC_OPTS  = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'].map(function(v){return{v:v,l:v};});
+const SRC_DEFAULTS = ['自研','ZF one api','ZF單接','OMG集成','HG集成','IM集成','單接','JVD FA api'];
+function loadSrcOpts(){
+  try{
+    var saved=JSON.parse(localStorage.getItem('wg_src_opts')||'null');
+    if(Array.isArray(saved)&&saved.length) return saved.map(function(v){return{v:v,l:v};});
+  }catch(e){}
+  return SRC_DEFAULTS.map(function(v){return{v:v,l:v};});
+}
+function saveSrcOpts(){
+  localStorage.setItem('wg_src_opts', JSON.stringify(SRC_OPTS.map(function(o){return o.v;})));
+}
+function addSrcOpt(val){
+  val=(val||'').trim();
+  if(!val) return false;
+  if(SRC_OPTS.find(function(o){return o.v===val;})) return false; // already exists
+  SRC_OPTS.push({v:val,l:val});
+  SRC_OPTS.sort(function(a,b){return a.v.localeCompare(b.v,'zh');});
+  saveSrcOpts();
+  DD_CFG.src.opts=SRC_OPTS;
+  rebuildSrcSelect(); // rebuild the <select> in form
+  return true;
+}
+var SRC_OPTS = loadSrcOpts();
 const CAT_CLS = {slots:'b-slots',live:'b-live',sports:'b-sports',lottery:'b-lottery',fish:'b-fish',poker:'b-poker','mini game':'b-mini','e-sports':'b-esports',cockfight:'b-cock'};
 const CAT_LBL = {slots:'電子',live:'視訊',sports:'體育',lottery:'彩票',fish:'捕魚',poker:'棋牌','mini game':'小遊戲','e-sports':'電競',cockfight:'鬥雞'};
 const DD_CFG = {cat:{opts:CAT_OPTS},src:{opts:SRC_OPTS},site:{opts:[]}};
@@ -716,9 +742,11 @@ async function loadAll(silent,forceRefresh){
 }
 
 function buildDDFromData(){
-  // Extract unique sources from data
-  const srcs=[...new Set(DATA.map(function(d){return d.source;}).filter(Boolean))].sort();
-  DD_CFG.src.opts=srcs.map(function(v){return{v:v,l:v};});
+  // Merge sources: from DATA (existing providers) + SRC_OPTS (custom added)
+  const fromData=DATA.map(function(d){return d.source;}).filter(Boolean);
+  const fromOpts=SRC_OPTS.map(function(o){return o.v;});
+  const merged=[...new Set([...fromOpts,...fromData])].sort(function(a,b){return a.localeCompare(b,'zh');});
+  DD_CFG.src.opts=merged.map(function(v){return{v:v,l:v};});
 }
 
 // ── Currency bar ──────────────────────────────────────
@@ -1251,13 +1279,75 @@ function toggleSite(sid){
   b.classList.toggle('dim',!on);
 }
 
+// ── 遊戲來源管理 ──────────────────────────────────────────────
+function rebuildSrcSelect(currentVal){
+  var sel=document.getElementById('f_source');
+  if(!sel) return;
+  var val=currentVal!==undefined?currentVal:(sel.value==='__new__'?'':sel.value);
+  sel.innerHTML='';
+  // placeholder
+  var ph=document.createElement('option');
+  ph.value=''; ph.textContent='— 選擇來源 —';
+  sel.appendChild(ph);
+  // existing opts from SRC_OPTS + any in DATA not yet in SRC_OPTS
+  var allSrcs=SRC_OPTS.map(function(o){return o.v;});
+  DATA.forEach(function(d){if(d.source&&!allSrcs.includes(d.source)){allSrcs.push(d.source);}});
+  allSrcs.sort(function(a,b){return a.localeCompare(b,'zh');});
+  allSrcs.forEach(function(v){
+    var opt=document.createElement('option');
+    opt.value=v; opt.textContent=v;
+    sel.appendChild(opt);
+  });
+  // add-new option
+  var addOpt=document.createElement('option');
+  addOpt.value='__new__'; addOpt.textContent='＋ 新增遊戲來源…';
+  sel.appendChild(addOpt);
+  // restore value
+  if(val) sel.value=val;
+}
+
+function onSrcSelectChange(sel){
+  var wrap=document.getElementById('f_source_new_wrap');
+  if(sel.value==='__new__'){
+    wrap.style.display='flex';
+    document.getElementById('f_source_new').focus();
+  } else {
+    wrap.style.display='none';
+  }
+}
+
+function confirmNewSrc(){
+  var inp=document.getElementById('f_source_new');
+  var val=(inp.value||'').trim();
+  if(!val){ inp.focus(); return; }
+  var isNew=addSrcOpt(val); // adds to SRC_OPTS + saves localStorage
+  // also sync DD_CFG for filter dropdown
+  renderDDList('src');
+  rebuildSrcSelect(val);
+  document.getElementById('f_source_new_wrap').style.display='none';
+  inp.value='';
+  if(isNew){
+    // brief toast
+    toast('已新增遊戲來源：'+val);
+  }
+}
+
+function cancelNewSrc(){
+  var sel=document.getElementById('f_source');
+  document.getElementById('f_source_new_wrap').style.display='none';
+  document.getElementById('f_source_new').value='';
+  // revert to first real option if currently __new__
+  if(sel.value==='__new__') sel.value=SRC_OPTS.length?SRC_OPTS[0].v:'';
+}
+
 function openAdd(){
   editingId=null;
   document.getElementById('moTitle').textContent='新增供應商';
   document.getElementById('moSaveBtn').textContent='新增';
   ['f_en','f_cn','f_note','f_prov','f_ext','f_cat_icon','f_bal_icon'].forEach(function(i){document.getElementById(i).value='';});
   document.getElementById('f_cat').value='slots';
-  document.getElementById('f_source').value='ZF one api';
+  rebuildSrcSelect('ZF one api');
+  document.getElementById('f_source_new_wrap').style.display='none';
   document.getElementById('f_ctrl').value='N';
   document.getElementById('f_enabled').value='N';
   document.getElementById('curBlocks').innerHTML=buildCurBlocks(null);
@@ -1273,7 +1363,8 @@ function openEdit(id){
   document.getElementById('f_en').value=d.en||'';
   document.getElementById('f_cn').value=d.cn||'';
   document.getElementById('f_cat').value=d.cat||'slots';
-  document.getElementById('f_source').value=d.source||'ZF one api';
+  rebuildSrcSelect(d.source||'ZF one api');
+  document.getElementById('f_source_new_wrap').style.display='none';
   document.getElementById('f_ctrl').value=d.ctrl||'N';
   document.getElementById('f_enabled').value=d.enabled||'N';
   document.getElementById('f_note').value=d.note||'';
