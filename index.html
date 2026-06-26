@@ -898,7 +898,7 @@ function render(){
 function baseColumns(d,skipEnabled){
   let r=`<td class="sticky-col td-name" style="min-width:160px;max-width:180px">
     <div class="td-en">${esc(d.en)}</div><div class="td-cn">${esc(d.cn)}</div>
-    ${d.note?`<div class="td-note">${esc(d.note)}</div>`:''}
+    ${(!isGuest&&d.note)?`<div class="td-note">${esc(d.note)}</div>`:''}
   </td>`;
   r+=`<td><span class="badge ${CAT_CLS[d.cat]||'b-esports'}">${CAT_LBL[d.cat]||d.cat}</span></td>`;
   if(ck('ck_src'))  r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
