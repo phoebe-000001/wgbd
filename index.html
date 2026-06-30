@@ -1210,11 +1210,11 @@ function buildCurBlocks(currenciesData){
           <input class="fi" id="cr_p2_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p2)}" placeholder="自動">
         </div>
         <div class="fgp">
-          <label class="fl">方案三 (+6%)</label>
+          <label class="fl">方案三 (+8%)</label>
           <input class="fi" id="cr_p3_${cur.code}" type="number" step="0.1" value="${pctVal(cd.p3)}" placeholder="自動">
         </div>
         <div class="fgp">
-          <label class="fl">官方費率 (+7%)</label>
+          <label class="fl">官方費率 (+9%)</label>
           <input class="fi" id="cr_off_${cur.code}" type="number" step="0.1" value="${pctVal(cd.official)}" placeholder="自動">
         </div>
       </div>
@@ -1252,8 +1252,8 @@ function autoFillRates(code){
   // 直接覆蓋，不管有沒有值（讓使用者清楚感覺到數字有跟著變）
   if(p1El)p1El.value=round2(orig+4);
   if(p2El)p2El.value=round2(orig+4);
-  if(p3El)p3El.value=round2(orig+6);
-  if(offEl)offEl.value=round2(orig+7);
+  if(p3El)p3El.value=round2(orig+8);
+  if(offEl)offEl.value=round2(orig+9);
 }
 
 function buildSiteBlocks(sitesData){
