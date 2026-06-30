@@ -160,6 +160,8 @@ td{padding:7px 10px;white-space:nowrap;vertical-align:middle;color:var(--t);}
 .td-rc{text-align:right;}
 .td-ctr{text-align:center;}
 .mono{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.copyable{cursor:pointer;}
+.copyable:hover{background:var(--sur2);color:var(--accent);}
 .badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;}
 .b-slots{background:#dbeafe;color:#1d4ed8;} .b-live{background:#d1fae5;color:#065f46;}
 .b-sports{background:#fef3c7;color:#92400e;} .b-lottery{background:#ede9fe;color:#5b21b6;}
@@ -904,10 +906,10 @@ function baseColumns(d,skipEnabled){
   if(ck('ck_src'))  r+=`<td><span class="src-tag">${d.source||'—'}</span></td>`;
   if(ck('ck_ctrl'))r+=`<td class="td-ctr"><span class="${d.ctrl==='Y'?'cy':'cn2'}">${d.ctrl==='Y'?'✓':'✗'}</span></td>`;
   if(ck('ck_enabled')&&!skipEnabled)r+=`<td class="td-ctr"><span class="${d.enabled==='Y'?'cy':'cn2'}">${d.enabled==='Y'?'✓':'✗'}</span></td>`;
-  if(ck('ck_cat_icon'))r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.cat_icon?esc(d.cat_icon):'—'}</td>`;
-  if(ck('ck_bal_icon'))r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.bal_icon?esc(d.bal_icon):'—'}</td>`;
-  if(ck('ck_prov'))r+=`<td class="mono" style="min-width:140px;word-break:break-all">${d.prov_code?esc(d.prov_code):'—'}</td>`;
-  if(ck('ck_ext')) r+=`<td class="mono" style="min-width:160px;word-break:break-all">${d.ext_cat?esc(d.ext_cat):'—'}</td>`;
+  if(ck('ck_cat_icon'))r+=`<td class="mono copyable" style="min-width:160px;word-break:break-all" title="點擊複製"${d.cat_icon?` onclick="copyText('${esc(d.cat_icon).replace(/'/g,"\\'")}')"`:''}>${d.cat_icon?esc(d.cat_icon):'—'}</td>`;
+  if(ck('ck_bal_icon'))r+=`<td class="mono copyable" style="min-width:160px;word-break:break-all" title="點擊複製"${d.bal_icon?` onclick="copyText('${esc(d.bal_icon).replace(/'/g,"\\'")}')"`:''}>${d.bal_icon?esc(d.bal_icon):'—'}</td>`;
+  if(ck('ck_prov'))r+=`<td class="mono copyable" style="min-width:140px;word-break:break-all" title="點擊複製"${d.prov_code?` onclick="copyText('${esc(d.prov_code).replace(/'/g,"\\'")}')"`:''}>${d.prov_code?esc(d.prov_code):'—'}</td>`;
+  if(ck('ck_ext')) r+=`<td class="mono copyable" style="min-width:160px;word-break:break-all" title="點擊複製"${d.ext_cat?` onclick="copyText('${esc(d.ext_cat).replace(/'/g,"\\'")}')"`:''}>${d.ext_cat?esc(d.ext_cat):'—'}</td>`;
   return r;
 }
 
@@ -1518,6 +1520,27 @@ function _syncMobLabel(){
 
 
 
+
+function copyText(val){
+  if(!val) return;
+  const doToast=function(){toast('已複製：'+val);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(val).then(doToast).catch(function(){
+      _fallbackCopy(val); doToast();
+    });
+  } else {
+    _fallbackCopy(val); doToast();
+  }
+}
+function _fallbackCopy(val){
+  const ta=document.createElement('textarea');
+  ta.value=val;
+  ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
 
 function toast(msg,isErr,persist){
   const t=document.getElementById('toast');
